@@ -151,7 +151,7 @@ namespace LibraryHeader
 		inline function onbtnShopControl(component, value)
 		{
 			if (!value && UserAccount.isOnline())
-				Engine.openWebsite(Config.baseURL[Config.mode]);
+				Engine.openWebsite(Config.baseURL[Config.MODE]);
 		}		
 	}
 	
@@ -168,7 +168,7 @@ namespace LibraryHeader
 		inline function onbtnSupportControl(component, value)
 		{
 			if (!value && UserAccount.isOnlineAndIsLoggedIn())
-				Engine.openWebsite(Config.baseURL[Config.mode] + Config.supportURL);
+				Engine.openWebsite(Config.baseURL[Config.MODE] + Config.supportURL);
 		}		
 	}
 	
