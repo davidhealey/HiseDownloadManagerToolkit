@@ -398,7 +398,8 @@ namespace Expansions
 			local props = e.getProperties();
 
 			local item = {
-				"name": props.ProjectName,
+				"name": props.Name,
+				"projectName": props.ProjectName,
 				"expansionName": props.Name,
 				"installedVersion": props.Version,
 				"sampleDirectory": e.getSampleFolder()

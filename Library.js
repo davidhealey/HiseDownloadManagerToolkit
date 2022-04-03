@@ -129,7 +129,7 @@ namespace Library
 				nest.result = false;
 
 				if (nest.item.format == "expansion")
-					nest.result = Expansions.uninstall(nest.item.expansionName);
+					nest.result = Expansions.uninstall(nest.item.name);
 				else if (nest.item.format == "plugin" && isDefined(Plugins.uninstall))
 					nest.result = Plugins.uninstall(nest.item);
 
@@ -171,6 +171,8 @@ namespace Library
 			for (x in installedExpansions)
 			{
 				local e = installedExpansions[x];
+
+				if (isDefined(Config.EXPANSION_HOST) && Config.EXPANSION_HOST != "" && Config.EXPANSION_HOST != e.projectName) continue;
 				items.push(e);
 			}
 
@@ -182,11 +184,11 @@ namespace Library
 
 					if (!isDefined(x.format) || !["expansion", "plugin"].contains(x.format)) continue;
 					if (!Config.SHOW_PLUGINS && x.format == "plugin") continue;
-					if ((!isDefined(Config.FULL_EXPANSIONS) && !Config.SHOW_PLUGINS) && (isDefined(Config.EXPANSION_HOST) && x.expansionHost != Config.EXPANSION_HOST || !isDefined(x.expansionHost))) continue;
+					if ((!isDefined(Config.FULL_EXPANSIONS) && !Config.SHOW_PLUGINS) && (isDefined(Config.EXPANSION_HOST) && x.projectName != Config.EXPANSION_HOST || !isDefined(x.projectName))) continue;
 
-					if (isDefined(installedExpansions[x.expansionName]))
+					if (isDefined(installedExpansions[x.name]))
 					{
-						index = items.indexOf(installedExpansions[x.expansionName]);
+						index = items.indexOf(installedExpansions[x.name]);
 						x.installedVersion = items[index].installedVersion;
 						x.sampleDirectory = items[index].sampleDirectory;
 					}
