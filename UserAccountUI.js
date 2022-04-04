@@ -56,6 +56,17 @@ namespace UserAccountUI
         if (value)
             UserAccount.login(lblUsername.get("text"), lblPassword.get("text"));
     }
+    
+    // btnLogout
+    const btnLogout = Content.getComponent("btnLogout");
+    btnLogout.setLocalLookAndFeel(LookAndFeel.iconButton);
+    btnLogout.setControlCallback(onbtnLogoutControl);
+    
+    inline function onbtnLogoutControl(component, value)
+    {
+    	if (value)
+    		UserAccount.logout();
+    }
         
 	// btnRegister
 	const btnRegister = Content.getComponent("btnRegister");

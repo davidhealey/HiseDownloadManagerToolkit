@@ -21,8 +21,6 @@ namespace LibraryHeader
 
 	reg syncCount = 0;
 
-	const btnToolbar = [];
-
 	// pnlLibraryHeader
 	const pnlLibraryHeader = Content.getComponent("pnlLibraryHeader");
 	
@@ -33,23 +31,10 @@ namespace LibraryHeader
 		LookAndFeel.drawInput(lblSearch, {"id": "search", "width": 17, "height": 17});		
 		LookAndFeel.drawInput(cmbFilter, {"id": "filter", "width": 17, "height": 17});
 	});
-	
-	// btnLogout
-	const btnLogout = Content.getComponent("btnLogout");
-	btnToolbar.push(btnLogout);
-	btnLogout.setLocalLookAndFeel(LookAndFeel.iconButton);
-	btnLogout.setControlCallback(onbtnLogoutControl);
-	
-	inline function onbtnLogoutControl(component, value)
-	{
-		if (value)
-			UserAccount.logout();
-	}
-		
+			
 	// btnSync
 	const btnSync = Content.getComponent("btnSync");
 	btnSync.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
-	btnToolbar.push(btnSync);
 	btnSync.setLocalLookAndFeel(LookAndFeel.iconButton);
 	btnSync.showControl(true);
 	btnSync.setControlCallback(onbtnSyncControl);
@@ -105,7 +90,6 @@ namespace LibraryHeader
 	
 	// btnAddLicense
 	const btnAddLicense = Content.getComponent("btnAddLicense");
-	btnToolbar.push(btnAddLicense);
 	btnAddLicense.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
 	btnAddLicense.setLocalLookAndFeel(LookAndFeel.iconButton);
 	btnAddLicense.setControlCallback(onbtnAddLicenseControl);
@@ -124,7 +108,6 @@ namespace LibraryHeader
 
 	// btnManualInstall
 	const btnManualInstall = Content.getComponent("btnManualInstall");
-	btnToolbar.push(btnManualInstall);
 	
 	if (isDefined(btnManualInstall))
 	{
@@ -140,7 +123,6 @@ namespace LibraryHeader
 	
 	// btnShop
 	const btnShop = Content.getComponent("btnShop");
-	btnToolbar.push(btnShop);
 	btnShop.set("enabled", Server.isOnline());
 	
 	if (isDefined(btnShop))
@@ -157,7 +139,6 @@ namespace LibraryHeader
 	
 	// btnSupport
 	const btnSupport = Content.getComponent("btnSupport");
-	btnToolbar.push(btnSupport);
 	btnSupport.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
 	
 	if (isDefined(btnSupport))
@@ -208,12 +189,6 @@ namespace LibraryHeader
 	}
 
 	// Functions
-	inline function positionButtons()
-	{
-		for (i = 0; i < btnToolbar.length; i++)
-			btnToolbar[i].set("x", 25 + i * 68);
-	}
-
 	inline function getSearchQuery()
 	{
 		return lblSearch.get("text");
@@ -243,7 +218,4 @@ namespace LibraryHeader
 			pnlSyncCooldown.startTimer(500);			
 		}
 	}
-	
-	// Function calls
-	positionButtons();
 }
