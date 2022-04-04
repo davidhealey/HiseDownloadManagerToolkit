@@ -115,7 +115,7 @@ namespace UserAccount
    	inline function deleteCredentials()
 	{
 		local f = appData.getChildFile("credentials.json");
-		authToken = false;
+		authToken = undefined;
 
 		if (f.isFile())
 			f.deleteFileOrDirectory();
@@ -148,7 +148,7 @@ namespace UserAccount
 	
 	inline function isLoggedIn()
 	{
-		return isDefined(getToken());
+		return isDefined(authToken);
 	}
 	
 	inline function isOnline()
@@ -163,7 +163,7 @@ namespace UserAccount
 	
 	inline function isOnlineAndIsLoggedInSilent()
 	{
-		return isDefined(getToken()) && online;
+		return isDefined(authToken) && online;
 	}
 	
 	inline function isOnlineAndIsLoggedIn()
@@ -173,7 +173,7 @@ namespace UserAccount
 		if (!online)
 			return Engine.showMessageBox("Offline Mode", "An internet connection is required.", 1);
 			
-		if (!isDefined(getToken()))
+		if (!isDefined(authToken))
 			return Engine.showMessageBox("Login Required", "You need to login to use this feature.", 1);
 			
 		if (Engine.isPlugin() && !Config.NETWORK_IN_PLUGIN)

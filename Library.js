@@ -40,7 +40,7 @@ namespace Library
 	// Functions
 	inline function autoSync()
 	{
-		if ((!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN) && Server.isOnline() && UserAccount.getToken() != false)
+		if ((!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN) && Server.isOnline() && isDefined(UserAccount.getToken()))
 		{
 			local lastSync = readLastSync();
 	
