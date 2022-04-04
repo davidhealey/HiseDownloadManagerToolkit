@@ -21,6 +21,7 @@ namespace LibraryList
 	const appData = FileSystem.getFolder(FileSystem.AppData);
 	
 	reg nest = {};
+	reg sortMode = 0;
 	reg item;
 	
 	// vptLibraryList
@@ -201,7 +202,10 @@ namespace LibraryList
 	{
 		Engine.sortWithFunction(data, function(a, b)
 		{
-		    if (a.name < b.name) return -1 else return a.name > b.name;
+			if (sortMode)
+			    if (a.name > b.name) return -1 else return a.name > b.name;
+			else
+			   if (a.name < b.name) return -1 else return a.name > b.name;
 		});
 	}
 		
