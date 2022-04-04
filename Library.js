@@ -40,11 +40,11 @@ namespace Library
 	// Functions
 	inline function autoSync()
 	{
-		if (!Engine.isPlugin() && Server.isOnline() && UserAccount.getToken() != false)
+		if ((!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN) && Server.isOnline() && UserAccount.getToken() != false)
 		{
 			local lastSync = readLastSync();
 	
-			if (isDefined(lastSync))
+			if (isDefined(lastSync) && typeof lastSync == "string")
 			{
 				local today = getTimeStampInDays(Engine.getSystemTime(false));
 				local lastDays = getTimeStampInDays(lastSync);

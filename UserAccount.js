@@ -176,7 +176,7 @@ namespace UserAccount
 		if (!isDefined(getToken()))
 			return Engine.showMessageBox("Login Required", "You need to login to use this feature.", 1);
 			
-		if (Engine.isPlugin())
+		if (Engine.isPlugin() && !Config.NETWORK_IN_PLUGIN)
 			return Engine.showMessageBox("Standalone Only", "This feature is only available in the standalone application.", 1);
 		
 		return true;
