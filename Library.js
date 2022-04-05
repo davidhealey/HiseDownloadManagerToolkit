@@ -184,7 +184,7 @@ namespace Library
 
 					if (!isDefined(x.format) || !["expansion", "plugin"].contains(x.format)) continue;
 					if (!Config.SHOW_PLUGINS && x.format == "plugin") continue;
-					if ((!isDefined(Config.FULL_EXPANSIONS) && !Config.SHOW_PLUGINS) && (isDefined(Config.EXPANSION_HOST) && x.projectName != Config.EXPANSION_HOST || !isDefined(x.projectName))) continue;
+					if ((!isDefined(Config.FULL_EXPANSIONS) && !Config.SHOW_PLUGINS) && (isDefined(Config.EXPANSION_HOST) && Config.EXPANSION_HOST != "" && (x.ProjectName != Config.EXPANSION_HOST || !isDefined(x.ProjectName)))) continue;
 
 					if (isDefined(installedExpansions[x.name]))
 					{
