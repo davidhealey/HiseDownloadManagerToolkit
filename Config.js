@@ -1,6 +1,6 @@
 namespace Config
 {
-	const MODE = "development";
+	const MODE = "testing";
 	const FULL_EXPANSIONS = true;
 	const EXPANSION_HOST = ""; // Only matching expansions will be displayed
 	const SHOW_PLUGINS = true;
@@ -11,7 +11,7 @@ namespace Config
 	const GRID_NUM_COLS = 4;
 	const GRID_MARGIN = 25;
 	const GRID_VERTICAL_MARGIN = 10;
-	const GRID_USE_LOAD_BUTTON = false;
+	const GRID_USE_LOAD_BUTTON = true;
 	
 	const apiPrefix = "wp-json/librewave/v1/";
 	const encryptionKey = 1234;

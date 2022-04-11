@@ -186,9 +186,9 @@ namespace Library
 					if (!Config.SHOW_PLUGINS && x.format == "plugin") continue;
 					if ((!isDefined(Config.FULL_EXPANSIONS) && !Config.SHOW_PLUGINS) && (isDefined(Config.EXPANSION_HOST) && Config.EXPANSION_HOST != "" && (x.ProjectName != Config.EXPANSION_HOST || !isDefined(x.ProjectName)))) continue;
 
-					if (isDefined(installedExpansions[x.name]))
+					if (isDefined(installedExpansions[x.expansionName]))
 					{
-						index = items.indexOf(installedExpansions[x.name]);
+						index = items.indexOf(installedExpansions[x.expansionName]);
 						x.installedVersion = items[index].installedVersion;
 						x.sampleDirectory = items[index].sampleDirectory;
 					}

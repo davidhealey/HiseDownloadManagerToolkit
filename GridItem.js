@@ -48,10 +48,11 @@ namespace GridItem
 		p.setPaintRoutine(function(g)
 		{
 			var a = this.getLocalBounds(0);
+			
+			if (isDefined(this.data.item.installedVersion))
+				g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
 
-			g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
-
-			g.setColour(Colours.withAlpha(Colours.white, isDefined(this.data.item.installedVersion) ? 1.0 : 0.8));
+			g.setColour(Colours.withAlpha(Colours.white, isDefined(this.data.item.installedVersion) ? 1.0 : 0.4));
 			g.drawImage("image", [a[0], a[1], a[2], a[2]], 0, 0);
 
 			// Progress indicator
@@ -98,7 +99,7 @@ namespace GridItem
 	{
 		local data = p.data.item;
 		local area = p.data.area;
-		
+
 		if (!isDefined(data.progress))
 		{
 			if (isDefined(data.installedVersion))
@@ -108,8 +109,8 @@ namespace GridItem
 				
 				if ((isDefined(data.hasLicense) && data.hasLicense || data.regularPrice == "0") && (isDefined(data.hasUpdate) && data.hasUpdate))
 					p.data.btnInstall = createActionButton(p, [area[2] - 90, area[2] + 10, 15, 19], "bell", "Update");
-				
-				if ((isDefined(Config.GRID_USE_LOAD_BUTTON) && Config.GRID_USE_LOAD_BUTTON) && isDefined(Config.FULL_EXPANSIONS) && data.format == "expansion")
+
+				if ((isDefined(Config.GRID_USE_LOAD_BUTTON) && Config.GRID_USE_LOAD_BUTTON) && isDefined(Config.FULL_EXPANSIONS) && isDefined(data.expansionName))
 				{
 					if (isDefined(Config.GRID_USE_LOAD_BUTTON) && Config.GRID_USE_LOAD_BUTTON)
 						p.data.btnLoad = createActionButton(p, [area[2] - 57, area[2] + 10, 19, 19], "playCircle", "Load");

@@ -40,7 +40,7 @@ namespace Expansions
 
 	inline function manualInstall()
 	{
-		if ((isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
+		if (isDefined(Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
 		{
 			FilePicker.show({
 				startFolder: FileSystem.Downloads, 
@@ -83,7 +83,7 @@ namespace Expansions
 					
 					if (zips.length > 0)
 					{
-						if ((isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
+						if (isDefined(Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
 						{
 							if (!isDefined(nest.startFolder))
 								nest.startFolder = FileSystem.Samples;
@@ -401,10 +401,11 @@ namespace Expansions
 				"name": props.Name,
 				"projectName": props.ProjectName,
 				"expansionName": props.Name,
+				"format": "expansion",
 				"installedVersion": props.Version,
 				"sampleDirectory": e.getSampleFolder()
 			};
-			
+
 			result[props.Name] = item;
 		}
 
