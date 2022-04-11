@@ -56,7 +56,7 @@ namespace Plugins
 					path = getAuPath();
 					
 				if (x.filename.toLowerCase().indexOf("_dat") != -1)
-					path = getDataDir(pluginName).toString(0);
+					path = getDataPath(pluginName);
 
 				if (isDefined(path))
 				{
@@ -119,9 +119,10 @@ namespace Plugins
 			if (data.pluginName == "")
 				data.pluginName = data.name;
 
-			local dataDir = getDataDir(data.pluginName);
-			
-			if (isDefined(dataPath) && dataPath.isDirectory())
+			local dataPath = getDataPath(data.pluginName);
+			local dataDir = FileSystem.fromAbsolutePath(dataPath);
+
+			if (isDefined(dataDir) && dataDir.isDirectory())
 			{
 				local audioData = dataDir.getChildFile("AudioResources.dat");
 				result = audioData.deleteFileOrDirectory();
@@ -215,14 +216,14 @@ namespace Plugins
 		return "/Library/Audio/Plug-Ins/Components";
 	}
 	
-	inline function getDataDir(pluginName)
+	inline function getDataPath(pluginName)
 	{
 		local f = appData.getParentDirectory().getChildFile(pluginName);
 	
 		if (f == undefined || !f.isDirectory())
 			f = appData.getParentDirectory().createDirectory(pluginName);
-			
-		return f;
+
+		return f.toString(f.FullPath);
 	}
 	
 }
