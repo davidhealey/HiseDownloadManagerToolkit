@@ -21,7 +21,7 @@ namespace Plugins
 
 	reg nest = {};
 	reg extractionCount;
-	
+
 	unzipTimer.setTimerCallback(function()
 	{
 		var progress = Engine.getPreloadProgress();
@@ -45,10 +45,13 @@ namespace Plugins
 				local os = Engine.getOS().toLowerCase();
 				nest.fileCount = data.length;
 
-				if (x.filename.toLowerCase().indexOf(os + "_vst.zip") != -1)
+				if (x.filename.toLowerCase().indexOf(os) == -1)
+					return Engine.showMessageBox("OS Mismatch", "The downloaded file is not for this OS. Please contact support.", 1);
+
+				if (x.filename.toLowerCase().indexOf("_vst") != -1)
 					path = getVst3Path();
 				
-				if (x.filename.toLowerCase().indexOf(os + "_au.zip") != -1)
+				if (x.filename.toLowerCase().indexOf("_au") != -1)
 					path = getAuPath();
 
 				if (isDefined(path))
@@ -172,7 +175,7 @@ namespace Plugins
 
 		local f = FileSystem.findFiles(vstPath, name + ".*", true)[0];
 
-		if (isDefined(f) && f.isDirectory())
+		if (isDefined(f))
 		{
 			return true;
 		}

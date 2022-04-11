@@ -70,7 +70,11 @@ namespace Downloader
 
 		var speed = FileSystem.descriptionOfSizeInBytes(this.getDownloadSpeed()) + "/s";
 		var action = this.getStatusText() + ": " + (downloadCount + 1) + "/" + downloads.length;
-		var status = FileSystem.descriptionOfSizeInBytes(this.data.numDownloaded) + "/" + FileSystem.descriptionOfSizeInBytes(this.data.numTotal);
+		var status = "";
+		
+		if (isDefined(this.data.numDownloaded))
+			status = FileSystem.descriptionOfSizeInBytes(this.data.numDownloaded) + "/" + FileSystem.descriptionOfSizeInBytes(this.data.numTotal);
+
 		ProgressBar.updateItemProgress(this.getProgress(), action, status);
 
 		if (this.data.finished)
