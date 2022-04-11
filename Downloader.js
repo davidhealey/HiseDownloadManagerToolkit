@@ -88,7 +88,7 @@ namespace Downloader
 					if (item.format == "expansion")
 						Expansions.install(item.expansionName, item.tempDir, item.sampleDirectory);
 					else if (item.format == "plugin")
-						Plugins.install(item.tempDir, item.downloads);
+						Plugins.install(item.pluginName, item.tempDir, item.downloads);
 				}
 			}
 			else if (abort != -1)

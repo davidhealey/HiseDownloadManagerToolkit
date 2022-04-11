@@ -18,6 +18,7 @@
 namespace Plugins
 {
 	const unzipTimer = Engine.createTimerObject();
+	const appData = FileSystem.getFolder(FileSystem.AppData);
 
 	reg nest = {};
 	reg extractionCount;
@@ -31,7 +32,7 @@ namespace Plugins
 	});
 
 	// Functions
-	inline function install(origin, data)
+	inline function install(pluginName, origin, data)
 	{
 		extractionCount = 0;
 
@@ -45,7 +46,7 @@ namespace Plugins
 				local os = Engine.getOS().toLowerCase();
 				nest.fileCount = data.length;
 
-				if (x.filename.toLowerCase().indexOf(os) == -1)
+				if (x.filename.toLowerCase().indexOf(os) == -1 && x.filename.toLowerCase().indexOf("_dat") == -1)
 					return Engine.showMessageBox("OS Mismatch", "The downloaded file is not for this OS. Please contact support.", 1);
 
 				if (x.filename.toLowerCase().indexOf("_vst") != -1)
@@ -53,6 +54,9 @@ namespace Plugins
 				
 				if (x.filename.toLowerCase().indexOf("_au") != -1)
 					path = getAuPath();
+					
+				if (x.filename.toLowerCase().indexOf("_dat") != -1)
+					path = getDataDir(pluginName).toString(0);
 
 				if (isDefined(path))
 				{
@@ -114,6 +118,14 @@ namespace Plugins
 		{
 			if (data.pluginName == "")
 				data.pluginName = data.name;
+
+			local dataDir = getDataDir(data.pluginName);
+			
+			if (isDefined(dataPath) && dataPath.isDirectory())
+			{
+				local audioData = dataDir.getChildFile("AudioResources.dat");
+				result = audioData.deleteFileOrDirectory();
+			}
 
 			local vstPath = getVst3Path();
 
@@ -202,4 +214,15 @@ namespace Plugins
 	{
 		return "/Library/Audio/Plug-Ins/Components";
 	}
+	
+	inline function getDataDir(pluginName)
+	{
+		local f = appData.getParentDirectory().getChildFile(pluginName);
+	
+		if (f == undefined || !f.isDirectory())
+			f = appData.getParentDirectory().createDirectory(pluginName);
+			
+		return f;
+	}
+	
 }
