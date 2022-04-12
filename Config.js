@@ -29,4 +29,26 @@ namespace Config
 		"testing": "https://",
 		"release": "https://"
 	};
+	
+	// Functions
+	inline function createDefaultLinkFile()
+	{
+		local filename = "";
+		local appData = FileSystem.getFolder(FileSystem.AppData);
+		
+		switch (Engine.getOS())
+		{
+			case "OSX": filename = "LinkOSX"; break;
+			case "LINUX": filename = "LinkLinux"; break;
+			case "WIN": filename = "LinkWindows"; break;
+		}
+
+		local f = appData.getChildFile(filename);
+
+		if (!isDefined(f) || !f.isFile())
+			f.writeString(appData.toString(appData.FullPath));		
+	}
+
+	// Function calls
+	createDefaultLinkFile();
 }
