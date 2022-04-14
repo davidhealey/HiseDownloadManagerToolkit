@@ -64,8 +64,21 @@ namespace UserAccountUI
     
     inline function onbtnLogoutControl(component, value)
     {
-    	if (value)
-    		UserAccount.logout();
+    	if (!value)
+    	{
+			if (UserAccount.isLoggedIn() == true)
+			{
+				Engine.showYesNoWindow("Confirm Logout", "Do you want to logout?", function(response)
+				{
+					if (response)
+						UserAccount.logout();
+				});
+			}
+			else
+			{
+				UserAccount.logout();
+			}
+    	}    		
     }
         
 	// btnRegister

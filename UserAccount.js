@@ -148,7 +148,7 @@ namespace UserAccount
 	
 	inline function isLoggedIn()
 	{
-		return isDefined(authToken);
+		return isDefined(authToken) && authToken != 0;
 	}
 	
 	inline function isOnline()
@@ -163,7 +163,7 @@ namespace UserAccount
 	
 	inline function isOnlineAndIsLoggedInSilent()
 	{
-		return isDefined(authToken) && online;
+		return isDefined(authToken) && authToken != 0 && online;
 	}
 	
 	inline function isOnlineAndIsLoggedIn()
@@ -173,7 +173,7 @@ namespace UserAccount
 		if (!online)
 			return Engine.showMessageBox("Offline Mode", "An internet connection is required.", 1);
 			
-		if (!isDefined(authToken))
+		if (!isDefined(authToken) || authToken == 0)
 			return Engine.showMessageBox("Login Required", "You need to login to use this feature.", 1);
 			
 		if (Engine.isPlugin() && !Config.NETWORK_IN_PLUGIN)
