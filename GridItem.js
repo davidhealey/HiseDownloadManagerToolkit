@@ -40,11 +40,6 @@ namespace GridItem
 		p.data.item = data;
 		p.data.area = area;
 
-		if (imagePath != false)
-			p.loadImage(imagePath, "image");
-		else
-			p.loadImage("{PROJECT_FOLDER}placeholder.jpg", "image");
-		
 		p.setPaintRoutine(function(g)
 		{
 			var a = this.getLocalBounds(0);
@@ -53,7 +48,9 @@ namespace GridItem
 				g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
 
 			g.setColour(Colours.withAlpha(Colours.white, isDefined(this.data.item.installedVersion) ? 1.0 : 0.4));
-			g.drawImage("image", [a[0], a[1], a[2], a[2]], 0, 0);
+			
+			if (this.isImageLoaded("image"))
+				g.drawImage("image", [a[0], a[1], a[2], a[2]], 0, 0);
 
 			// Progress indicator
 			if (isDefined(this.data.item.progress))
@@ -90,8 +87,15 @@ namespace GridItem
 				g.drawFittedText(this.data.item.progress.status, [arcArea[0], a[1] + a[2] / 2 + 5, arcArea[2], 30], "centred", 2, 1.0);
 			}
 		});
-		
+				
 		addButtons(p);
+
+		if (imagePath != false)
+			p.loadImage(imagePath, "image");
+		else
+			p.loadImage("{PROJECT_FOLDER}placeholder.jpg", "image");
+
+		return p;
 	}
 	
 	// Functions
