@@ -469,7 +469,7 @@ namespace Expansions
 				}
 				else
 				{
-					local index = images.indexOf("{EXP::" + expName + "}" + imgName.replace(".jpg") + ".jpg");
+					local index = images.indexOf(e.getWildcardReference(imgName.replace(".jpg") + ".jpg"));
 					
 					if (index != -1)
 						return images[index];
