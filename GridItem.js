@@ -39,6 +39,7 @@ namespace GridItem
 		p.set("allowCallbacks", "Clicks & Hover");
 		p.data.item = data;
 		p.data.area = area;
+		p.data.imagePath = imagePath;
 
 		p.setPaintRoutine(function(g)
 		{
@@ -50,7 +51,16 @@ namespace GridItem
 			g.setColour(Colours.withAlpha(Colours.white, isDefined(this.data.item.installedVersion) ? 1.0 : 0.4));
 			
 			if (this.isImageLoaded("image"))
+			{
 				g.drawImage("image", [a[0], a[1], a[2], a[2]], 0, 0);
+				
+				if (this.data.imagePath == false)
+				{
+					g.setColour(this.get("textColour"));
+					g.setFont("medium", 22 - Config.GRID_NUM_COLS);
+					g.drawFittedText(this.data.item.name, [a[0] + a[2] / 15, a[1] + a[2] / 3, a[2] - a[2] / 15 * 2, a[2] - a[2] / 3 * 2], "centred", 2, 1);
+				}
+			}		
 
 			// Progress indicator
 			if (isDefined(this.data.item.progress))
@@ -93,7 +103,7 @@ namespace GridItem
 		if (imagePath != false)
 			p.loadImage(imagePath, "image");
 		else
-			p.loadImage("{PROJECT_FOLDER}placeholder.jpg", "image");
+			p.loadImage("{PROJECT_FOLDER}placeholder.png", "image");
 
 		return p;
 	}
