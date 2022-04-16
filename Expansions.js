@@ -40,7 +40,7 @@ namespace Expansions
 
 	inline function manualInstall()
 	{
-		if (isDefined(Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
+		if (isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER && isDefined(FilePicker.show))
 		{
 			FilePicker.show({
 				startFolder: FileSystem.Downloads, 
@@ -83,7 +83,7 @@ namespace Expansions
 					
 					if (zips.length > 0)
 					{
-						if (isDefined(Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
+						if (isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER && isDefined(FilePicker.show))
 						{
 							if (!isDefined(nest.startFolder))
 								nest.startFolder = FileSystem.Samples;
@@ -457,7 +457,7 @@ namespace Expansions
 	{
 		local e = expHandler.getExpansion(expName);
 		
-		if (isDefined(e))
+		if (isDefined(e) && expName == "Santoor")
 		{
 			local images = e.getImageList();
 
