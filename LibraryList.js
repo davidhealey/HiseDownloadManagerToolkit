@@ -47,6 +47,8 @@ namespace LibraryList
 	// Functions
 	inline function addChildPanel(data, img)
 	{
+		if (!pnlLibraryList.get("visible")) return;
+
 		if (Config.GRID_LAYOUT)
 			GridItem.create(pnlLibraryList, data, img);	
 		else
