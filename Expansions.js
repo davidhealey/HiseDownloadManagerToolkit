@@ -457,7 +457,7 @@ namespace Expansions
 	{
 		local e = expHandler.getExpansion(expName);
 		
-		if (isDefined(e) && expName == "Santoor")
+		if (isDefined(e))
 		{
 			local images = e.getImageList();
 
