@@ -21,7 +21,6 @@ namespace Downloader
 	const downloads = [];
 	
 	reg tempDir = FileSystem.getFolder(FileSystem.Temp);
-	reg downloadCount;
 	reg abort = false;
 	reg item;
 	reg nest = {};
@@ -41,12 +40,9 @@ namespace Downloader
 	inline function downloadItem()
 	{
 		abort = false;
-		downloadCount = 0;
 		downloads.clear();
 
-		local headers = ["Authorization: Bearer " + UserAccount.getToken()];
-
-		Server.setHttpHeader(headers.join("\n"));
+		Server.setHttpHeader("");
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
 		Server.cleanFinishedDownloads();
 		
@@ -67,23 +63,16 @@ namespace Downloader
 	{
 		if (abort || abort == -1)
 			this.abort();
-
-		var speed = FileSystem.descriptionOfSizeInBytes(this.getDownloadSpeed()) + "/s";
-		var action = this.getStatusText() + ": " + (downloadCount + 1) + "/" + downloads.length;
-		var status = "";
 		
-		if (isDefined(this.data.numDownloaded))
-			status = FileSystem.descriptionOfSizeInBytes(this.data.numDownloaded) + "/" + FileSystem.descriptionOfSizeInBytes(this.data.numTotal);
-
-		ProgressBar.updateItemProgress(this.getProgress(), action, status);
+		updateProgress(this);
 
 		if (this.data.finished)
 		{
-			downloadCount++;
-
 			if (this.data.success)
 			{
-				if (downloadCount >= downloads.length)
+				downloads.remove(this);
+
+				if (downloads.length == 0)
 				{
 					if (item.format == "expansion")
 						Expansions.install(item.expansionName, item.tempDir, item.sampleDirectory);
@@ -100,12 +89,29 @@ namespace Downloader
 				else
 					Engine.showMessageBox("Aborted", msg, 1);
 
-				postDownload("aborted");
+				postDownload();
 				abort = -1;
 			}
 		}
 	}
 	
+	inline function updateProgress(download)
+	{
+		local data = {value: 0, action: "Processing", speed: undefined, status: undefined};
+		
+		if (download.getProgress() > 0)
+		{
+			data.value = download.getProgress();
+			data.action = "Downloading";
+			data.status = "File: " + (item.downloads.length - downloads.length + 1) + "/" + item.downloads.length;
+
+			if (download.getDownloadSpeed() > 0)
+				data.speed = FileSystem.descriptionOfSizeInBytes(download.getDownloadSpeed()) + "/s";
+		}
+
+		ProgressBar.setProperties(data);		
+	}
+		
 	inline function addToQueue(data)
 	{
 		nest.queueData = data;
@@ -119,6 +125,7 @@ namespace Downloader
 
 		Server.setHttpHeader(headers.join("\n"));
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
+		Server.cleanFinishedDownloads();
 		
 		Spinner.show("Verifying license");
 
@@ -134,6 +141,7 @@ namespace Downloader
 					queue.push(nest.queueData);
 					nest.queueData.progress = ProgressBar.getDefaultProgressObject();
 					LibraryList.rebuildChildButtons(nest.queueData.id);
+					LibraryHeader.enableButtonsThatInterfereWithDownloads(false);
 
 					if (queue.length == 1)
 					{
@@ -143,7 +151,7 @@ namespace Downloader
 				}
 				else
 				{
-					ErrorHandler.serverError(status, response, "Could not find any download links. Please contact support if this issue persists.");
+					ErrorHandler.serverError(status, response, "");
 				}
 			}
 			else
@@ -155,8 +163,13 @@ namespace Downloader
 	
 	inline function removeFromQueue(data)
 	{
-		data.progress = undefined;
-		queue.remove(data);
+		if (isDefined(data))
+		{
+			data.progress = undefined;
+			
+			if (queue.contains(data))
+				queue.remove(data);
+		}
 	}
 	
 	inline function clearTemp()
@@ -172,17 +185,16 @@ namespace Downloader
 		removeFromQueue(data);
 	}
 	
-	inline function postDownload(status)
+	inline function postDownload()
 	{
+		ProgressBar.clear();
+
 		if (isDefined(item))
 		{
-			Log.addEntry(item, "install", status);
 			removeFromQueue(item);
 			item.installedVersion = "temp";
 			LibraryList.rebuildChildButtons(item.id);
 		}
-
-		ProgressBar.clear();
 
 		if (queue.length > 0)
 		{
@@ -195,9 +207,11 @@ namespace Downloader
 			clearTemp();
 			Server.cleanFinishedDownloads();
 			Library.updateCatalogue();
+			downloads.clear();
+			LibraryHeader.enableButtonsThatInterfereWithDownloads(true);
 		}
 	}
-	
+		
 	inline function getQueueLength()
 	{
 		return queue.length;
@@ -212,11 +226,16 @@ namespace Downloader
 	
 		return true;
 	}
+	
+	inline function isDownloading()
+	{
+		return queue.length != 0 && downloads.length != 0;
+	}
 
 	// Function calls
 	if (!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN)
 	{
-		Server.setNumAllowedDownloads(3);
+		Server.setNumAllowedDownloads(1);
 		Server.cleanFinishedDownloads();
 	}
 }

@@ -76,6 +76,14 @@ namespace ProgressBar
 		item.progress.status = status;
 	}
 	
+	inline function setProperties(data)
+	{
+		if (!isDefined(item.progress)) return;
+
+		for (x in data)
+			item.progress[x] = data[x];
+	}	
+	
 	inline function getDefaultProgressObject()
 	{
 		return {"value": 0.0, "count": -1, "counter": 5, "action": "Pending", "status": ""};
