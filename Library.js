@@ -165,7 +165,12 @@ namespace Library
 			items.clear();
 
 			local f = cache.getChildFile("cache.json");
-			local cacheData = f.loadEncryptedObject(encryptionKey);
+			
+			local cacheData = undefined;
+
+			if (isDefined(f) && f.isFile())
+				cacheData = f.loadEncryptedObject(encryptionKey);
+
 			local installedExpansions = Expansions.getExpansions();
 
 			for (x in installedExpansions)
@@ -210,7 +215,7 @@ namespace Library
 		 
 	inline function clearCache()
 	{
-		if (cache.isDirectory())
+		if (isDefined(cache) && cache.isDirectory())
 			cache.deleteFileOrDirectory();
 
 		Server.cleanFinishedDownloads();
@@ -218,6 +223,21 @@ namespace Library
 		LibraryList.clear();
 		items.clear();
 		images.clear();
+	}
+	
+	inline function getCachedImageNames()
+	{
+		local result = [];
+
+		if (isDefined(cache) && cache.isDirectory())
+		{
+			local files = FileSystem.findFiles(cache, "*.jpg", false);
+
+			for (x in files)
+				result.push(x.toString(x.NoExtension));
+		}
+
+		return result;
 	}
 
 	inline function rebuildCache()
@@ -234,30 +254,35 @@ namespace Library
 		{
 			if (status == 200)
 			{
-				clearCache();
+				images.clear();
 
 				nest.f = cache.getChildFile("cache.json");
 				nest.f.writeEncryptedObject(response, encryptionKey);
-
-				nest.numItems = response.length;
-				images.clear();
+				nest.numItems = response.length;				
+				nest.cachedImages = getCachedImageNames();
 
 				for (x in response)
 				{
-					if (isDefined(x.image))
+					if (nest.cachedImages.indexOf(x.id) != -1)
+					{
+						if (!images.contains(x.id))
+							images.push(x.id);
+					}
+					else if (isDefined(x.image))
 					{
 						nest.url = x.image.replace(Config.baseURL[Config.MODE], "");
 						nest.f = cache.getChildFile(x.id + ".jpg");
-						
+							
 						Server.downloadFile(nest.url, {}, nest.f, function()
 						{
 							if (this.data.finished && this.data.success)
 							{
-								nest.name = this.getDownloadedTarget().toString(1);
-	
+								nest.img = this.getDownloadedTarget();
+								nest.name = nest.img.toString(nest.img.NoExtension);
+		
 								if (!images.contains(nest.name))
 									images.push(nest.name);
-	
+		
 								if (images.length >= nest.numItems && Spinner.isVisible())
 								{
 									checkForAppUpdate();
@@ -268,14 +293,20 @@ namespace Library
 					}
 					else
 					{
-						images.push("placeholder"); // Just a value to fill out the array
+						images.push(""); // Just a value to fill out the array
+					}
+
+					if (images.length >= nest.numItems && Spinner.isVisible())
+					{
+						checkForAppUpdate();
+						updateCatalogue();
 					}
 				}
 			}
 			else
 			{
 				nest.msg = "The server reported an error, please try again or contact support.";
-				ErrorHandler.serverError(status, response, msg);
+				ErrorHandler.serverError(status, response, nest.msg);
 				Spinner.hide();
 			}
 		});
@@ -285,7 +316,7 @@ namespace Library
 	{
 		local f = cache.getChildFile("cache.json");
 		
-		if (f.isFile())
+		if (isDefined(f) && f.isFile())
 		{
 			local data = f.loadEncryptedObject(encryptionKey);
 			
@@ -301,7 +332,11 @@ namespace Library
 	{
 		local headers = ["Authorization: Bearer " + UserAccount.getToken()];
 		local endpoint = Config.apiPrefix + "check_for_app_update";
-		local p = {"installed_version": Engine.getVersion(), "user_os": Engine.getOS()};
+		local p = {
+			"app_name": Config.APP_NAME,
+			"installed_version": Engine.getVersion(),
+			"user_os": Engine.getOS()
+		};
 
         Server.setHttpHeader(headers.join("\n"));
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
@@ -315,13 +350,13 @@ namespace Library
 			{	
 				if (response[0] != false)
 				{
-					var msg = "A new version of " + Engine.getName() + " is available. Would you like to download the installer now?";
-					var url = response[0];
+					nest.msg = "A new version of " + Engine.getName() + " is available. Would you like to download the installer now?";
+					nest.url = response[0];
 
-					Engine.showYesNoWindow("Update", msg, function(action)
+					Engine.showYesNoWindow("Update", nest.msg, function(action)
 					{
 						if (action)
-							downloadAppUpdate(url);
+							downloadAppUpdate(nest.url);
 					});
 				}
 			}
@@ -338,30 +373,36 @@ namespace Library
 	{
 		local filename = url.substring(url.lastIndexOf("/") + 1, url.length);
 		nest.dir = FileSystem.getFolder(FileSystem.Downloads);
-		nest.f = dir.getChildFile(filename);
+		nest.f = nest.dir.getChildFile(filename);
 		
+		Server.setHttpHeader("");
 		Server.setBaseURL(Config.webPrefix[Config.MODE]);
 		
 		Spinner.show("Downloading Update");
-		
+
 		Server.downloadFile(url.replace(Config.webPrefix[Config.MODE]), {}, nest.f, function()
 		{
 			if (this.data.finished)
 			{
-				nest.msg = "The download is complete. Would you like to exit and run the update installer?";
-
-				Engine.showYesNoWindow("Success", nest.msg, function(action)
+				if (this.data.success)
 				{
-					if (action)
+					Engine.showYesNoWindow("Success", "The download is complete. Would you like to exit and run the update installer?", function(action)
 					{
-						if (nest.f.setExecutePermission(true))
-							nest.f.startAsProcess("");
-						else
-							nest.dir.show();
-
-						Engine.quit();						
-					}
-				});
+						if (action)
+						{
+							if (nest.f.setExecutePermission(true))
+								nest.f.startAsProcess("");
+							else
+								nest.dir.show();
+	
+							Engine.quit();						
+						}
+					});
+				}
+				else
+				{
+					Engine.showMessageBox("Error", "The download was unsuccessful, please contact support.", 3);
+				}
 
 				Spinner.hide();
 			}
@@ -394,11 +435,14 @@ namespace Library
 	    local timeStamp = Math.round(dateString.substring(6, 8))           // Days
 	                    + Math.round(dateString.substring(4, 6)) * 30      // Months
 	                    + Math.round(dateString.substring(0, 4)) * 365;    // Years
-	
+
 	    return timeStamp;
 	}
 
 	// Function calls
-	autoSync();
-	updateCatalogue();
+	if (!Engine.isPlugin())
+	{
+		autoSync();
+		updateCatalogue();
+	}
 }
