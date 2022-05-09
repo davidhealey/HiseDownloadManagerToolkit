@@ -65,7 +65,7 @@ namespace Plugins
 					if (!target.isDirectory())
 					{
 						Engine.showMessageBox("Missing Directory", "The plugin directory at " + path  + " was not found. Please verify this directory exists and try again.", 4);
-						Downloader.postDownload("Error: Missing Directory");
+						Downloader.postDownload();
 					}
 					else 
 					{
@@ -91,7 +91,7 @@ namespace Plugins
 									if (obj.Error != "")
 										Engine.showMessageBox("Installation Error", obj.Error, 3);										
 
-									Downloader.postDownload(obj.Error);
+									Downloader.postDownload();
 									Spinner.hide();
 								}
 							}							
@@ -183,22 +183,20 @@ namespace Plugins
 
 	inline function isInstalled(name)
 	{
+		return isDefined(getFile(name));
+	}
+	
+	inline function getFile(name)
+	{
 		local vstPath = FileSystem.fromAbsolutePath(getVst3Path());
 		local auPath = FileSystem.fromAbsolutePath(getAUPath());
 
-		local f = FileSystem.findFiles(vstPath, name + ".*", true)[0];
-
-		if (isDefined(f))
-		{
-			return true;
-		}
-		else if (Engine.getOS() == "OSX")
-		{
-			f = FileSystem.findFiles(auPath, name + ".*", true)[0];				
-			return isDefined(f) && f.isDirectory();
-		}
+		local f = FileSystem.findFiles(vstPath, name + ".vst3", true)[0];
 		
-		return false;
+		if (!isDefined(f) && Engine.getOS() == "OSX")
+			f = FileSystem.findFiles(auPath, name + ".component", true)[0];
+		
+		return f;		
 	}
 
 	inline function getVst3Path()
@@ -216,14 +214,25 @@ namespace Plugins
 		return "/Library/Audio/Plug-Ins/Components";
 	}
 	
-	inline function getDataPath(pluginName)
+	inline function getDataPath(name)
 	{
-		local f = appData.getParentDirectory().getChildFile(pluginName);
+		local f = appData.getParentDirectory().getChildFile(name);
 	
 		if (f == undefined || !f.isDirectory())
-			f = appData.getParentDirectory().createDirectory(pluginName);
+			f = appData.getParentDirectory().createDirectory(name);
 
 		return f.toString(f.FullPath);
+	}
+	
+	inline function getVersion(name)
+	{
+		local plugin = getFile(name);
+		local f = plugin.getChildFile("version");
+
+		if (isDefined(f) && f.isFile())
+			return f.loadAsString();
+			
+		return "1.0.0";
 	}
 	
 }
