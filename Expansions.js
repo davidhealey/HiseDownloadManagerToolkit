@@ -32,34 +32,34 @@ namespace Expansions
 		if (appData.isDirectory() && origin.isDirectory() && sampleDir.isDirectory())
 		{
 			abortInstall = false;
+			nest.expName = expName;
 			zips = FileSystem.findFiles(origin, "*.zip", false);
 			createExpansionDirectory(expName, sampleDir);
+			unload(expName);
 			unpackZips(sampleDir);
+		}
+	}
+	
+	inline function unload(expName)
+	{
+		for (e in expList)
+		{
+			if (e.getProperties().Name == expName)
+				e.unloadExpansion();
 		}
 	}
 
 	inline function manualInstall()
 	{
-		if (isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER && isDefined(FilePicker.show))
-		{
-			FilePicker.show({
-				startFolder: FileSystem.Downloads, 
-				mode: 0,
-				filter: "*.zip",
-				title: "Install from Zip Files",
-				icon: ["zipFile", 45, 60],
-				message: "Select the hxi zip file.",
-				buttonText: "Next"
-			}, true, selectHxiCallback);
-		}
-		else
-		{
-			Engine.showYesNoWindow("Select File", "Select the hxi zip file.", function(response)
-			{
-				if (response)
-					FileSystem.browse(FileSystem.Downloads, false, "*.zip", selectHxiCallback);
-			});
-		}
+		FilePicker.show({
+			startFolder: FileSystem.Downloads, 
+			mode: 0,
+			filter: "*.zip",
+			title: "Install from Zip Files",
+			icon: ["zipFile", 45, 60],
+			message: "Select the hxi zip file.",
+			buttonText: "Next"
+		}, selectHxiCallback);
 	}
 
 	function selectHxiCallback(f)
@@ -83,28 +83,19 @@ namespace Expansions
 					
 					if (zips.length > 0)
 					{
-						if (isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER && isDefined(FilePicker.show))
+						if (!isDefined(nest.startFolder))
+							nest.startFolder = FileSystem.Desktop;
+							
+						FilePicker.show(
 						{
-							if (!isDefined(nest.startFolder))
-								nest.startFolder = FileSystem.Samples;
-
-							FilePicker.show({
-								startFolder: nest.startFolder,
-								mode: 1,
-								filter: "",
-								title: "Install from Zip Files",
-								icon: ["hdd", 45, 60],
-								message: "Choose a location to install the samples.",
-								buttonText: "Install"
-							}, false, selectSampleInstallLocationCallback);
-						}
-						else
-						{
-							Engine.showYesNoWindow("Install Location", "Choose a location to install the samples.", function(response)
-							{
-								FileSystem.browseForDirectory(nest.origin, selectSampleInstallLocationCallback);
-							});
-						}
+							startFolder: nest.startFolder,
+							mode: 1,
+							filter: "",
+							title: "Install from Zip Files",
+							icon: ["hdd", 45, 60],
+							message: "Choose a location to install the samples.",
+							buttonText: "Install"
+						}, selectSampleInstallLocationCallback);
 					}
 					else
 					{
@@ -220,23 +211,27 @@ namespace Expansions
 	{
 		if (obj.Error != "" || abortInstall)
 			obj.Cancel = true;
-			
+
 		if (obj.Status == 1)
 			updateProgressBar(obj);
 
 		if (obj.Status == 2)
 		{
 			extractionCount++;
-			
+		
 			if (extractionCount >= zips.length)
 			{
 				if (obj.Error != "")
 					Engine.showMessageBox("Install Error", obj.Error, 3);
 				else if (isDefined(Toaster.centre))
 					Toaster.centre("The installation is complete.");
-
-				refreshExpansions();
-				Downloader.postDownload(obj.Error);
+				
+				if (isDefined(Config.ENCODE_EXPANSIONS) && Config.ENCODE_EXPANSIONS)
+					Expansions.encodeExpansion(nest.expName);
+				else
+					refreshExpansions();
+				
+				Downloader.postDownload();
 				
 				Spinner.hide();
 			}
@@ -257,12 +252,36 @@ namespace Expansions
 		Spinner.setMessage(action + " " + Math.round(obj.Progress * 100) + "%");
 	}
 
+	inline function encodeExpansion(expName)
+	{
+		local hxiFile = appData.getChildFile("Expansions").getChildFile(expName).getChildFile("info.hxi");
+
+		if (Config.MODE == "development")
+			hxiFile = FileSystem.fromAbsolutePath(Config.DEV_FOLDER).getChildFile("Expansions").getChildFile(expName).getChildFile("info.hxi");
+
+		if (isDefined(hxiFile))
+		{
+			local result = expHandler.encodeWithCredentials(hxiFile);
+
+			if (result)
+			{
+				hxiFile.deleteFileOrDirectory();
+				refreshExpansions();
+			}
+		}
+		else
+		{
+			Engine.showMessageBox("Error", "The installation was not successful. Please contact support", 1);
+			uninstall(expName);
+		}
+	}
+
 	inline function getExpansionDirectory(expName)
 	{
 		local expansions = appData.getChildFile("Expansions");
 
 		if (Config.MODE == "development")
-			expansions = FileSystem.fromAbsolutePath("/media/dave/Work/Projects/Libre Player/libreplayer mkv/Expansions");
+			expansions = FileSystem.fromAbsolutePath(Config.DEV_FOLDER).getChildFile("Expansions");
 
 		return expansions.getChildFile(expName);
 	}
@@ -456,27 +475,34 @@ namespace Expansions
 	inline function getImagePath(expName, imgName)
 	{
 		local e = expHandler.getExpansion(expName);
-		
+
 		if (isDefined(e))
 		{
+			if (imgName == "Icon.png")
+				return e.getWildcardReference(imgName);	
+
 			local images = e.getImageList();
 
 			if (images.length > 0)
 			{
-				if (!isDefined(imgName) || imgName == "")
-				{
-					return images[0];
-				}
-				else
-				{
-					local index = images.indexOf(e.getWildcardReference(imgName.replace(".jpg") + ".jpg"));
+				local index = images.indexOf(e.getWildcardReference(imgName));
 					
-					if (index != -1)
-						return images[index];
-				}
+				if (index != -1)
+					return images[index];
 			}
 		}
 		
-		return false;
+		return undefined;
+	}
+	
+	inline function setCredentials(value)
+	{
+		if (isDefined(value))
+			expHandler.setCredentials({"username": value});
+	}
+		
+	inline function getCurrent()
+	{
+		return expHandler.getCurrentExpansion();
 	}
 }	
