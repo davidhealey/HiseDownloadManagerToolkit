@@ -42,18 +42,44 @@ namespace LibraryList
 			g.setColour(Colours.withAlpha(vptLibraryList.get("textColour"), 0.5));
 			g.drawAlignedText(vptLibraryList.get("text"), [0, 0, this.getWidth(), this.getHeight() / 1.2], "centred");
 		}
+		else
+		{
+			var children = this.getChildPanelList();
+			
+			if (children.length > 0)
+			{
+				for (x in children)
+				{
+					if (isDefined(Config.GRID_LAYOUT) && Config.GRID_LAYOUT)
+						GridItem.paint(x);
+					else
+						ListItem.paint(x);
+				}
+			}
+		}
 	});	
 	
 	// Functions
+	inline function show()
+	{
+		vptLibraryList.showControl(true);
+	}
+	
+	inline function hide()
+	{
+		vptLibraryList.showControl(false);
+	}
+	
 	inline function addChildPanel(data, img)
 	{
-		if (!pnlLibraryList.get("visible")) return;
-
 		if (Config.GRID_LAYOUT)
 			GridItem.create(pnlLibraryList, data, img);	
 		else
 			ListItem.create(pnlLibraryList, data, img);
-			
+
+		pnlLibraryList.loadImage(img, data.name);
+		pnlLibraryList.repaint();
+
 		Config.GRID_LAYOUT ? GridItem.resizePanel(pnlLibraryList) : ListItem.resizePanel(pnlLibraryList);	
 	}
 	
@@ -86,7 +112,10 @@ namespace LibraryList
 	inline function removeAllChildPanels()
 	{
 		for (x in pnlLibraryList.getChildPanelList())
+		{
+			x.unloadAllImages();
 			x.removeFromParent();
+		}
 	}
 	
 	inline function buttonPanelMouseCallback()
@@ -118,37 +147,23 @@ namespace LibraryList
 		}
 		else
 		{
-			if ((isDefined(Config.CUSTOM_FILE_PICKER) && Config.CUSTOM_FILE_PICKER) && isDefined(FilePicker.show))
+			if (isDefined(item.sampleDirectory) && item.sampleDirectory.isDirectory())
+			{
+				Downloader.addToQueue(item);
+			}
+			else
 			{
 				FilePicker.show({
-					startFolder: FileSystem.Samples,
+					startFolder: FileSystem.Desktop,
 					mode: 1,
 					filter: "",
 					title: item.name,
 					icon: ["hdd", 45, 60],
 					message: "Choose a location to install the samples.",
 					buttonText: "Install"
-				}, true, function(dir)
-				{
+				}, function(dir) {
 					item.sampleDirectory = dir;
 					Downloader.addToQueue(item);
-				});					
-			}
-			else
-			{
-				Engine.showYesNoWindow("Install Location", "Choose a location to install the samples.", function(response)
-				{
-					if (response)
-					{
-						FileSystem.browseForDirectory(FileSystem.Samples, function(dir)
-						{
-							if (dir.isDirectory())
-							{
-								item.sampleDirectory = dir;
-								Downloader.addToQueue(item);
-							}
-						});
-					}
 				});
 			}
 		}
@@ -156,12 +171,14 @@ namespace LibraryList
 	
 	inline function populateFromArray(data)
 	{
+		if (!vptLibraryList.get("visible")) return;
+
 		clear();
 		sortList(data);
 
 		for (x in data)
 			add(x);
-			
+
 		pnlLibraryList.repaint();
 	}
 
@@ -174,14 +191,7 @@ namespace LibraryList
 			if (Plugins.isInstalled(item.name))
 			{
 				if (!isDefined(item.installedVersion))
-				{
-					local logEntry = Log.getMostRecentEntry(item.name);
-
-					if (isDefined(logEntry.version) && logEntry.action == "install")
-						item.installedVersion = logEntry.version;
-					else
-						item.installedVersion = "1.0.0";
-				}
+					item.installedVersion = Plugins.getVersion(item.name);
 			}
 		}		
 
@@ -213,6 +223,14 @@ namespace LibraryList
 		
 	inline function getImagePath(expName, id)
 	{
+		if (isDefined(expName))
+		{
+			 local img = Expansions.getImagePath(expName, "Icon.png");
+
+			 if (isDefined(img))
+			 	return img;
+		}			
+
 		if (isDefined(id))
 		{
 			local cache = appData.getChildFile("cache");
@@ -220,16 +238,13 @@ namespace LibraryList
 			if (isDefined(cache) && cache.isDirectory())
 			{
 				local img = cache.getChildFile(id + ".jpg");
-				
+
 				if (isDefined(img) && img.isFile())
 					return img.toString(image.FullPath);
 			}
 		}
 
-		if (isDefined(expName))
-			return Expansions.getImagePath(expName, "");
-
-		return false;
+		return "{PROJECT_FOLDER}placeholder.png";
 	}
 	
 	inline function getListPosition()
@@ -241,4 +256,10 @@ namespace LibraryList
 	{
 		return list.length;
 	}
+	
+	// Function calls
+	if (isDefined(UserAccount.getToken()))
+		show();
+	else
+		hide();
 }

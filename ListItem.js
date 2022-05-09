@@ -8,7 +8,7 @@
 
     This file is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
@@ -19,7 +19,7 @@ namespace ListItem
 {
 	const USE_LOAD_BUTTON = false;
 	
-	inline function create(panel, data, imagePath)
+	inline function create(panel, data, img)
 	{
 		local p = panel.addChildPanel();
 		local area = [0, (panel.getChildPanelList().length - 1) * Config.LIST_ROW_HEIGHT, panel.getWidth(), Config.LIST_ROW_HEIGHT];
@@ -32,41 +32,29 @@ namespace ListItem
 		p.set("text", data.name);
 		p.data.item = data;
 		p.data.area = area;
-		
-		if (imagePath != false)
-			p.loadImage(imagePath, "image");
-		else
-			p.loadImage("{PROJECT_FOLDER}placeholder.jpg", "image");
-
+		p.data.img = img;
+				
 		p.setPaintRoutine(function(g)
 		{
 			var a = [10, 0, this.getWidth() - 20, this.getHeight() - 20];
 
-			g.drawDropShadow([a[0], a[1] + 5, a[2], a[3] + 5], Colours.withAlpha(Colours.black, 0.1), 10);
-
-			g.setColour(this.get("bgColour"));
-			g.fillRoundedRectangle(a, 8);
-
-			g.setColour(Colours.white);
-			g.drawImage("image", [a[0] + 15, a[1] + 15, 125, 125], 0, 0);
-
 			g.setColour(this.get("textColour"));
 
 			g.setFont("medium", 24);
-			g.drawAlignedText(this.get("text"), [a[0] + 160, a[1] + 10, a[2], 30], "left");
+			g.drawAlignedText(this.get("text"), [a[0] + 200, a[1] + 10, a[2], 30], "left");
 			
 			if (isDefined(this.data.item.progress))
 			{
 				g.setColour(this.get("itemColour"));
 				g.fillRoundedRectangle([218, a[3] / 2 - 3, a[2] / 2, 6], 3);
-	
+
 				g.setColour(0xffeebd75);
 
 				if (this.data.item.progress.value > 0.0)
 					g.fillRoundedRectangle([218, a[3] / 2 - 3, a[2] / 2 * this.data.item.progress.value, 6], 3);
 				else if (this.data.item.progress.count > -1)
 					g.fillRoundedRectangle([218 + a[2] / 2 * this.data.item.progress.count - a[2] / 2 / 3 * this.data.item.progress.count, a[3] / 2 - 3, a[2] / 2 / 3, 6], 3);
-				
+
 				g.setFont("medium", 18);
 				g.setColour(this.get("textColour"));
 				g.drawAlignedText(this.data.item.progress.action, [218, a[3] / 3.3, a[2] / 2, 30], "centred");
@@ -77,21 +65,29 @@ namespace ListItem
 			else
 			{
 				g.setFont("regular", 16);
-				g.drawFittedText(this.data.item.shortDescription, [a[0] + 160, a[1] + 50, a[2] - 200, 65], "left", 3, 1.0);
+				g.drawFittedText(this.data.item.shortDescription, [a[0] + 200, a[1] + 50, a[2] - 200, 65], "left", 3, 1.0);
 			}
-			
-			g.setFont("medium", 16);
-
-			if (isDefined(this.data.item.size))
-				g.drawAlignedText(FileSystem.descriptionOfSizeInBytes(this.data.item.size), [a[0] + 15, a[3] - 50, 125, 50], "left");
-			
-			if (isDefined(this.data.item.installedVersion))
-				g.drawAlignedText("v" + this.data.item.installedVersion, [a[0] + 15, a[3] - 50, 125, 50], "right");
 		});
-		
+
 		addButtons(p);
 	}
 	
+	inline function paint(p)
+	{
+		local a = [p.get("x") + 10, p.get("y"), p.getWidth() - 20, p.getHeight() - 20];
+
+		g.drawDropShadow([a[0], a[1] + 5, a[2], a[3] + 5], Colours.withAlpha(Colours.black, 0.1), 10);
+		
+		g.setColour(Colours.withAlpha(p.get("bgColour"), isDefined(p.data.item.installedVersion) ? 1.0 : 0.8));
+		g.fillRoundedRectangle(a, 8);
+
+		if (this.isImageLoaded(p.data.item.name))
+		{			
+			g.setColour(Colours.white);			
+			g.drawImage(p.data.item.name, [a[0] + 20, a[1] + a[3] / 2 - (a[3] - a[3] / 4) / 2, a[3] - a[3] / 4, a[3] - a[3] / 4], 0, 0);
+		}
+	}
+		
 	inline function removeChildren(p)
 	{
 		for (x in p.getChildPanelList())

@@ -17,7 +17,7 @@
 
 namespace GridItem
 {
-	inline function create(panel, data, imagePath)
+	inline function create(panel, data, img)
 	{
 		local p = panel.addChildPanel();
 
@@ -36,31 +36,13 @@ namespace GridItem
 		p.set("itemColour", panel.get("itemColour"));
 		p.set("itemColour2", panel.get("itemColour2"));
 		p.set("textColour", panel.get("textColour"));
-		p.set("allowCallbacks", "Clicks & Hover");
 		p.data.item = data;
 		p.data.area = area;
-		p.data.imagePath = imagePath;
+		p.data.img = img;
 
 		p.setPaintRoutine(function(g)
 		{
 			var a = this.getLocalBounds(0);
-			
-			if (isDefined(this.data.item.installedVersion))
-				g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
-
-			g.setColour(Colours.withAlpha(Colours.white, isDefined(this.data.item.installedVersion) ? 1.0 : 0.4));
-			
-			if (this.isImageLoaded("image"))
-			{
-				g.drawImage("image", [a[0], a[1], a[2], a[2]], 0, 0);
-				
-				if (this.data.imagePath == false)
-				{
-					g.setColour(this.get("textColour"));
-					g.setFont("medium", 22 - Config.GRID_NUM_COLS);
-					g.drawFittedText(this.data.item.name, [a[0] + a[2] / 15, a[1] + a[2] / 3, a[2] - a[2] / 15 * 2, a[2] - a[2] / 3 * 2], "centred", 2, 1);
-				}
-			}		
 
 			// Progress indicator
 			if (isDefined(this.data.item.progress))
@@ -72,12 +54,12 @@ namespace GridItem
 				g.setColour(Colours.withAlpha(Colours.black, 0.5));
 				g.fillRect([a[0], a[1], a[2], a[2]]);
 
-				g.setColour(Colours.withAlpha(0xff3b3635, 0.8));
+				g.setColour(Colours.withAlpha(0xff363639, 0.8));
 				g.drawEllipse(arcArea, 13);
 				
-			    g.setColour(Colours.withAlpha(0xffeebd75, 0.9));
+			    g.setColour(Colours.withAlpha(0xffeebd75, 1.0));
 			    var path = Content.createPath();
-			    var arcThickness = 0.025;
+			    var arcThickness = 0.05;
 			    var startOffset = 3.15;
 			    var endOffset = -startOffset + 2.0 * startOffset * v;
 			    
@@ -88,27 +70,55 @@ namespace GridItem
 
 				g.setFont("semibold", 22);
 				g.setColour(this.get("textColour"));
-			    g.drawAlignedText(parseInt(Math.ceil(v * 100)) + "%", [a[0], a[1] + a[2] / 2 - 45, a[2], 25], "centred");
+			    g.drawAlignedText(parseInt(Math.ceil(v * 100)) + "%", [a[0], a[1] + a[2] / 2 - 50, a[2], 25], "centred");
 
 				g.setFont("semibold", 16);
-				g.drawFittedText(this.data.item.progress.action, [arcArea[0], a[1] + a[2] / 2 - 15, arcArea[2], 30], "centred", 2, 1.0);
+				g.drawFittedText(this.data.item.progress.action, [arcArea[0], a[1] + a[2] / 2 - 27, arcArea[2], 30], "centred", 1, 1.0);
+
+				g.setFont("regular", 16);
+				if (isDefined(this.data.item.progress.status))
+					g.drawFittedText(this.data.item.progress.status, [arcArea[0], a[1] + a[2] / 2 - 3, arcArea[2], 30], "centred", 1, 1.0);
 				
 				g.setFont("semibold", 14);
-				g.drawFittedText(this.data.item.progress.status, [arcArea[0], a[1] + a[2] / 2 + 5, arcArea[2], 30], "centred", 2, 1.0);
+				if (isDefined(this.data.item.progress.speed))
+					g.drawFittedText(this.data.item.progress.speed, [arcArea[0], a[1] + a[2] / 2 + 20, arcArea[2], 30], "centred", 1, 1.0);
 			}
+
+			g.setFont("medium", 16);
+			g.setColour(Colours.withAlpha(this.get("textColour"), isDefined(this.data.item.installedVersion) ? 1.0 : 0.8));
+
+			if (isDefined(this.data.item.displayName))
+				g.drawFittedText(this.data.item.displayName, [a[0], a[3] - 48, a[2] - 75 - (20 * isDefined(this.data.item.hasUpdate)), 30], "left", 2, 1.0);
+			else
+				g.drawFittedText(this.data.item.name, [a[0], a[3] - 48, a[2] - 75 - (20 * isDefined(this.data.item.hasUpdate)), 25], "left", 2, 1.0);
 		});
-				
+
 		addButtons(p);
-
-		if (imagePath != false)
-			p.loadImage(imagePath, "image");
-		else
-			p.loadImage("{PROJECT_FOLDER}placeholder.png", "image");
-
+		
 		return p;
 	}
 	
-	// Functions
+	inline function paint(p)
+	{
+		local a = [p.get("x"), p.get("y"), p.getWidth(), p.getHeight()];
+		
+		if (this.isImageLoaded(p.data.item.name))
+		{
+			if (isDefined(p.data.item.installedVersion))
+				g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
+			
+			g.setColour(Colours.withAlpha(Colours.white, isDefined(p.data.item.installedVersion) ? 1.0 : 0.7));						
+			g.drawImage(p.data.item.name, [a[0], a[1], a[2], a[2]], 0, 0);
+		}
+		
+		if (isDefined(p.data.img) && p.data.img.indexOf("placeholder") != -1)
+		{
+			g.setColour(p.get("textColour"));
+			g.setFont("medium", 22 - Config.GRID_NUM_COLS);
+			g.drawFittedText(p.data.item.name, [a[0] + a[2] / 15, a[1] + a[2] / 3, a[2] - a[2] / 15 * 2, a[2] - a[2] / 3 * 2], "centred", 2, 1);
+		}
+	}
+	
 	inline function addButtons(p)
 	{
 		local data = p.data.item;
@@ -126,11 +136,7 @@ namespace GridItem
 
 				if ((isDefined(Config.GRID_USE_LOAD_BUTTON) && Config.GRID_USE_LOAD_BUTTON) && isDefined(Config.FULL_EXPANSIONS) && isDefined(data.expansionName))
 				{
-					if (isDefined(Config.GRID_USE_LOAD_BUTTON) && Config.GRID_USE_LOAD_BUTTON)
-						p.data.btnLoad = createActionButton(p, [area[2] - 57, area[2] + 10, 19, 19], "playCircle", "Load");
-					else
-						p.data.btnLoad = createLoadButton(p, [0, 0, area[2], area[2]]);
-
+					p.data.btnLoad = createActionButton(p, [area[2] - 57, area[2] + 10, 19, 19], "playCircle", "Load");
 					p.data.btnLoad.setControlCallback(LibraryItem.onbtnLoadControl);
 				}				
 			}
@@ -162,7 +168,8 @@ namespace GridItem
 		}
 
 		// btnRating
-		p.data.btnRating = createRatingButton(p, [5, area[2] + 13, 70, 25], data);
+		if (isDefined(Config.SHOW_PRODUCT_RATING) && Config.SHOW_PRODUCT_RATING && UserAccount.isOnlineAndIsLoggedInSilent())
+			p.data.btnRating = createRatingButton(p, [5, area[2] + 13, 70, 25], data);
 	}
 	
 	inline function createActionButton(parent, area, icon, text)
