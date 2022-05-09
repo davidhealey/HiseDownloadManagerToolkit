@@ -52,8 +52,11 @@ namespace LibraryItem
 	{
 		if (!value)
 		{
+			if (Downloader.isDownloading())
+				return Toaster.centre("Please wait for downloads to finish.");
+
 			local parent = component.getParentPanel();
-			nest.item = parent.data.item.clone();
+			nest.item = parent.data.item;
 	
 			Engine.showYesNoWindow("Confirm Uninstall", "Do you want to uninstall " + nest.item.name + "?", function(response)
 			{
@@ -65,8 +68,6 @@ namespace LibraryItem
 						nest.status = Expansions.uninstall(nest.item.expansionName);
 					else
 						nest.status = Plugins.uninstall(nest.item);
-					
-					Log.addEntry(nest.item, "uninstall", nest.status);
 
 					if (nest.status != "")
 					{
@@ -115,8 +116,11 @@ namespace LibraryItem
 	// btnLoad
 	inline function onbtnLoadControl(component, value)
 	{
-		if (!value && !Downloader.getQueueLength())
+		if (!value)
 		{
+			if (Downloader.isDownloading())
+				return Toaster.centre("Please wait for downloads to finish.");
+
 			local parent = component.getParentPanel();
 			item = parent.data.item;
 	

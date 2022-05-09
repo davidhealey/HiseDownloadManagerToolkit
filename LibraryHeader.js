@@ -31,10 +31,12 @@ namespace LibraryHeader
 		LookAndFeel.drawInput(lblSearch, {"id": "search", "width": 17, "height": 17});		
 		LookAndFeel.drawInput(cmbFilter, {"id": "filter", "width": 17, "height": 17});
 	});
-			
+	
+	// btnLogout
+	const btnLogout = Content.getComponent("btnLogout");
+	
 	// btnSync
 	const btnSync = Content.getComponent("btnSync");
-	btnSync.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
 	btnSync.setLocalLookAndFeel(LookAndFeel.iconButton);
 	btnSync.showControl(true);
 	btnSync.setControlCallback(onbtnSyncControl);
@@ -46,30 +48,39 @@ namespace LibraryHeader
 			if (!isDefined(UserAccount.isOnlineAndIsLoggedIn()))
 				return;
 	
-			if (syncCount < 4)
+			if (syncCount < 20)
+			{
+				if (Content.isCtrlDown())
+					Library.clearCache();
+
 				Library.rebuildCache();
+			}				
 			else
+			{
 				Engine.showMessageBox("Limit Reached", "You've reached the sync limit. Please restart the app if you need to sync again.", 0);
+			}				
 
 			syncCount++;
 			syncCooldown();
 			writeLastSync();
 		}
 	}
-	
+		
 	// pnlSyncCooldown
 	const pnlSyncCooldown = Content.getComponent("pnlSyncCooldown");
 	pnlSyncCooldown.setPosition(btnSync.get("x"), btnSync.get("y"), btnSync.getWidth(), btnSync.getHeight());
-	pnlSyncCooldown.setValue(0);
-	
+	pnlSyncCooldown.showControl(false);
+
 	pnlSyncCooldown.setTimerCallback(function()
 	{
 		this.setValue(this.getValue() - 0.5);
 		btnSync.showControl(false);
+		this.showControl(true);
 		
 		if (this.getValue() <= 0)
 		{
 			this.stopTimer();
+			this.showControl(false);
 			btnSync.showControl(true);
 		}
 		
@@ -80,17 +91,16 @@ namespace LibraryHeader
 	{
 		var a = this.getLocalBounds(0);
 	
-		g.setColour(Colours.withAlpha(this.get("bgColour"), this.getValue() / 15));
+		g.setColour(Colours.withAlpha(this.get("bgColour"), 0.7));
 		g.fillEllipse(a);
 		
-		g.setColour(Colours.withAlpha(this.get("itemColour"), this.getValue() / 15));
+		g.setColour(this.get("itemColour"));
 		g.rotate(Math.toRadians(360 - 360 / 1 * this.getValue() / 15), [a[2] / 2, a[3] / 2]);
 		g.fillRoundedRectangle([a[0] + a[2] / 2 - 1.5, a[1], 3, a[3] / 3], 1);
 	});
 	
 	// btnAddLicense
 	const btnAddLicense = Content.getComponent("btnAddLicense");
-	btnAddLicense.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
 	btnAddLicense.setLocalLookAndFeel(LookAndFeel.iconButton);
 	btnAddLicense.setControlCallback(onbtnAddLicenseControl);
 	
@@ -108,49 +118,36 @@ namespace LibraryHeader
 
 	// btnManualInstall
 	const btnManualInstall = Content.getComponent("btnManualInstall");
+	btnManualInstall.set("enabled", true);
+	btnManualInstall.setLocalLookAndFeel(LookAndFeel.iconButton);
+	btnManualInstall.setControlCallback(onbtnManualInstallControl);
 	
-	if (isDefined(btnManualInstall))
+	inline function onbtnManualInstallControl(component, value)
 	{
-		btnManualInstall.setLocalLookAndFeel(LookAndFeel.iconButton);
-		btnManualInstall.setControlCallback(onbtnManualInstallControl);
-		
-		inline function onbtnManualInstallControl(component, value)
-		{
-			if (!value)
-				Expansions.manualInstall();
-		}		
+		if (!value)
+			Expansions.manualInstall();
 	}
-	
+
 	// btnShop
 	const btnShop = Content.getComponent("btnShop");
-	btnShop.set("enabled", Server.isOnline());
-	
-	if (isDefined(btnShop))
-	{
-		btnShop.setLocalLookAndFeel(LookAndFeel.iconButton);
-		btnShop.setControlCallback(onbtnShopControl);
+	btnShop.setLocalLookAndFeel(LookAndFeel.iconButton);
+	btnShop.setControlCallback(onbtnShopControl);
 		
-		inline function onbtnShopControl(component, value)
-		{
-			if (!value && UserAccount.isOnline())
-				Engine.openWebsite(Config.baseURL[Config.MODE]);
-		}		
+	inline function onbtnShopControl(component, value)
+	{
+		if (!value && UserAccount.isOnline())
+			Engine.openWebsite(Config.baseURL[Config.MODE]);
 	}
 	
 	// btnSupport
 	const btnSupport = Content.getComponent("btnSupport");
-	btnSupport.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
-	
-	if (isDefined(btnSupport))
-	{
-		btnSupport.setLocalLookAndFeel(LookAndFeel.iconButton);
-		btnSupport.setControlCallback(onbtnSupportControl);
+	btnSupport.setLocalLookAndFeel(LookAndFeel.iconButton);
+	btnSupport.setControlCallback(onbtnSupportControl);
 		
-		inline function onbtnSupportControl(component, value)
-		{
-			if (!value && UserAccount.isOnlineAndIsLoggedIn())
-				Engine.openWebsite(Config.baseURL[Config.MODE] + Config.supportURL);
-		}		
+	inline function onbtnSupportControl(component, value)
+	{
+		if (!value && UserAccount.isOnlineAndIsLoggedIn())
+			Engine.openWebsite(Config.baseURL[Config.MODE] + Config.supportURL);
 	}
 	
 	// lblSearch
@@ -189,6 +186,22 @@ namespace LibraryHeader
 	}
 
 	// Functions
+	inline function setEnabledStateOfButtons()
+	{
+		btnSync.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
+		btnAddLicense.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
+		btnShop.set("enabled", Server.isOnline());
+		btnSupport.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
+	}
+	
+	inline function enableButtonsThatInterfereWithDownloads(state)
+	{
+		btnLogout.set("enabled", state);
+		btnSync.set("enabled", state && UserAccount.isOnlineAndIsLoggedInSilent());
+		btnAddLicense.set("enabled", state && UserAccount.isOnlineAndIsLoggedInSilent());
+		btnManualInstall.set("enabled", state);
+	}
+	
 	inline function getSearchQuery()
 	{
 		return lblSearch.get("text");
@@ -218,4 +231,7 @@ namespace LibraryHeader
 			pnlSyncCooldown.startTimer(500);			
 		}
 	}
+	
+	// Function calls
+	setEnabledStateOfButtons();
 }
