@@ -1,10 +1,11 @@
 namespace Config
 {
-	const MODE = "testing";
+	const MODE = "development";
+	const APP_NAME = "Libre Wave App";
 	const FULL_EXPANSIONS = true;
 	const EXPANSION_HOST = ""; // Only matching expansions will be displayed
+	const ENCODE_EXPANSIONS = false;
 	const SHOW_PLUGINS = true;
-	const CUSTOM_FILE_PICKER = true;
 	const NETWORK_IN_PLUGIN = true; // Enable network connection in plugin mode
 	const GRID_LAYOUT = true;
 	const LIST_ROW_HEIGHT = 200; // Height of each list item
@@ -12,9 +13,10 @@ namespace Config
 	const GRID_MARGIN = 25;
 	const GRID_VERTICAL_MARGIN = 10;
 	const GRID_USE_LOAD_BUTTON = true;
+	const DEV_FOLDER = "/media/dave/Work/Projects/Libre Player/libreplayer mkv";
 	
 	const apiPrefix = "wp-json/librewave/v1/";
-	const encryptionKey = 1234;
+	const encryptionKey = Engine.getProjectInfo().EncryptionKey;
 
 	const baseURL = {
 		"development": "http://localhost/wordpress",
