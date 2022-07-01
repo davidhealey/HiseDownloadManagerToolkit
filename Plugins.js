@@ -108,7 +108,7 @@ namespace Plugins
 	
 	inline function uninstall(data)
 	{
-		local msg = "";
+		local msg = "The uninstallation completed successfully.";
 		local result = false;
 
 		if (!isDefined(data.pluginName) && isDefined(data.name))
