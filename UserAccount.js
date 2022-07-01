@@ -53,6 +53,14 @@ namespace UserAccount
     const lblPassword = Content.getComponent("lblPassword");
     lblPassword.set("fontStyle", "Password");
     
+    lblPassword.setKeyPressCallback(function(event)
+    {
+		if (event.keycode == 13 || event.description == "return")
+			login(lblUsername.get("text"), lblPassword.get("text"));
+		else if (!event.specialKey && event.character != "")
+			lblPassword.set("text", lblPassword.get("text") + event.character);			
+    });
+        
     // btnShowPassword
     const btnShowPassword = Content.getComponent("btnShowPassword");
     btnShowPassword.setLocalLookAndFeel(LookAndFeel.iconButton);
