@@ -147,9 +147,9 @@ namespace UserAccount
 
     	g.setFont("medium", 26);
     	g.setColour(this.get("textColour"));
-    	g.drawAlignedText("Create New Account", [lblRegisterEmail.get("x") + 25, lblRegisterEmail.get("y") - 60, lblRegisterEmail.getWidth(), 30], "left");
+    	g.drawAlignedText("Create New Account", [a[0], lblRegisterEmail.get("y") - 60, a[2], 30], "centred");
     	
-    	g.fillPath(Paths.icons["newUser"], [lblRegisterEmail.get("x") - 30, lblRegisterEmail.get("y") - 60, 37, 32]);
+    	g.fillPath(Paths.icons["newUser"], [lblRegisterEmail.get("x") - 20, lblRegisterEmail.get("y") - 62, 37, 32]);
     	
     	g.setFont("medium", 18);
     	g.drawAlignedText("Accept", [lblRegisterEmail.get("x") - 10, lblRegisterEmail.get("y") + 40, 50, 30], "left");
