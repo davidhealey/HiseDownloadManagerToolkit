@@ -223,8 +223,8 @@ namespace Expansions
 			{
 				if (obj.Error != "")
 					Engine.showMessageBox("Install Error", obj.Error, 3);
-				else if (isDefined(Toaster.centre))
-					Toaster.centre("The installation is complete.");
+				else
+					Notification.show("The installation is complete.");
 				
 				if (isDefined(Config.ENCODE_EXPANSIONS) && Config.ENCODE_EXPANSIONS)
 					Expansions.encodeExpansion(nest.expName);

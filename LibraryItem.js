@@ -53,7 +53,7 @@ namespace LibraryItem
 		if (!value)
 		{
 			if (Downloader.isDownloading())
-				return Toaster.centre("Please wait for downloads to finish.");
+				return Notification.show("Please wait for downloads to finish.");
 
 			local parent = component.getParentPanel();
 			nest.item = parent.data.item;
@@ -70,12 +70,7 @@ namespace LibraryItem
 						nest.status = Plugins.uninstall(nest.item);
 
 					if (nest.status != "")
-					{
-						if (isDefined(Toaster.centre))
-							Toaster.centre(nest.status);
-						else
-							Engine.showMessageBox("Info", nest.status, 0);
-					}
+						Notification.show(nest.status);
 	
 					Library.updateCatalogue();
 				}
@@ -119,7 +114,7 @@ namespace LibraryItem
 		if (!value)
 		{
 			if (Downloader.isDownloading())
-				return Toaster.centre("Please wait for downloads to finish.");
+				return Notification.show("Please wait for downloads to finish.");
 
 			local parent = component.getParentPanel();
 			item = parent.data.item;

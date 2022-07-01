@@ -97,7 +97,7 @@ namespace AddLicense
 				else
 				{
 					Library.rebuildCache();
-					Toaster.centre("The license was successfully added to your account.");
+					Notification.show("The license was successfully added to your account.");
 				}
 			}
 			else

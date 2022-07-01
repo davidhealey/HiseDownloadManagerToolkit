@@ -83,12 +83,8 @@ namespace Downloader
 			else if (abort != -1)
 			{
 				var msg = abort ? "The download was cancelled" : "The download failed";
-				
-				if (isDefined(Toaster.centre))
-					Toaster.centre(msg);
-				else
-					Engine.showMessageBox("Aborted", msg, 1);
 
+				Notification.show(msg);
 				postDownload();
 				abort = -1;
 			}
