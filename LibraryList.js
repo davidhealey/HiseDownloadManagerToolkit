@@ -152,11 +152,12 @@ namespace LibraryList
 			else
 			{
 				FilePicker.show({
-					startFolder: FileSystem.Desktop,
+					startFolder: UserSettings.getDefaultSampleFolder(),				
 					mode: 1,
+					storePath: true,
 					filter: "",
 					title: item.name,
-					icon: ["hdd", 45, 60],
+					icon: ["hdd", 60, 60],
 					message: "Choose a location to install the samples.",
 					buttonText: "Install"
 				}, function(dir) {
