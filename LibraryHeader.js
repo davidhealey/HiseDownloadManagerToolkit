@@ -19,6 +19,7 @@ namespace LibraryHeader
 {
 	const appData = FileSystem.getFolder(FileSystem.AppData);
 
+	reg syncCooldown = 0;
 	reg syncCount = 0;
 
 	// pnlLibraryHeader
@@ -48,96 +49,69 @@ namespace LibraryHeader
 			if (!isDefined(UserAccount.isOnlineAndIsLoggedIn()))
 				return;
 	
-			if (syncCount < 20)
+			if (syncCount < 10)
 			{
+				local cooldown = Engine.getUptime() - syncCooldown;
+
+				if (cooldown < 15)
+					return Engine.showMessageBox("Cooldown", "Please wait " + parseInt(Math.ceil(15 - cooldown)) + " seconds.", 0);
+
 				if (Content.isCtrlDown())
 					Library.clearCache();
 
 				Library.rebuildCache();
+				syncCooldown = Engine.getUptime();
+				syncCount++;
 			}				
 			else
 			{
 				Engine.showMessageBox("Limit Reached", "You've reached the sync limit. Please restart the app if you need to sync again.", 0);
-			}				
-
-			syncCount++;
-			syncCooldown();
-			writeLastSync();
+			}
 		}
 	}
 		
-	// pnlSyncCooldown
-	const pnlSyncCooldown = Content.getComponent("pnlSyncCooldown");
-	pnlSyncCooldown.setPosition(btnSync.get("x"), btnSync.get("y"), btnSync.getWidth(), btnSync.getHeight());
-	pnlSyncCooldown.showControl(false);
-
-	pnlSyncCooldown.setTimerCallback(function()
+	// cmbAdd
+	const cmbAdd = Content.getComponent("cmbAdd");
+	const cmbAddLaf = Content.createLocalLookAndFeel();
+	cmbAdd.setLocalLookAndFeel(cmbAddLaf);
+	cmbAdd.setControlCallback(oncmbAddControl);
+	
+	inline function oncmbAddControl(component, value)
 	{
-		this.setValue(this.getValue() - 0.5);
-		btnSync.showControl(false);
-		this.showControl(true);
-		
-		if (this.getValue() <= 0)
+		switch (value)
 		{
-			this.stopTimer();
-			this.showControl(false);
-			btnSync.showControl(true);
+			case 1:
+				if (UserAccount.isOnlineAndIsLoggedIn())
+				 	AddLicense.show();
+
+			 	break;
+			 	
+			case 2:
+				Expansions.manualInstall();
+				break;
 		}
-		
-		this.repaint();
-	});
-	
-	pnlSyncCooldown.setPaintRoutine(function(g)
-	{
-		var a = this.getLocalBounds(0);
-	
-		g.setColour(Colours.withAlpha(this.get("bgColour"), 0.7));
-		g.fillEllipse(a);
-		
-		g.setColour(this.get("itemColour"));
-		g.rotate(Math.toRadians(360 - 360 / 1 * this.getValue() / 15), [a[2] / 2, a[3] / 2]);
-		g.fillRoundedRectangle([a[0] + a[2] / 2 - 1.5, a[1], 3, a[3] / 3], 1);
-	});
-	
-	// btnAddLicense
-	const btnAddLicense = Content.getComponent("btnAddLicense");
-	btnAddLicense.setLocalLookAndFeel(LookAndFeel.iconButton);
-	btnAddLicense.setControlCallback(onbtnAddLicenseControl);
-	
-	inline function onbtnAddLicenseControl(component, value)
-	{
-		if (!value)
-		{
-			if (!UserAccount.isOnlineAndIsLoggedIn())
-				return;
-	
-			if (isDefined(AddLicense.show))
-				AddLicense.show();
-		}
+
+		component.setValue(0);
 	}
 
-	// btnManualInstall
-	const btnManualInstall = Content.getComponent("btnManualInstall");
-	btnManualInstall.set("enabled", true);
-	btnManualInstall.setLocalLookAndFeel(LookAndFeel.iconButton);
-	btnManualInstall.setControlCallback(onbtnManualInstallControl);
-	
-	inline function onbtnManualInstallControl(component, value)
+	cmbAddLaf.registerFunction("drawComboBox", function(g, obj)
 	{
-		if (!value)
-			Expansions.manualInstall();
-	}
+		var a = obj.area;
 
-	// btnShop
-	const btnShop = Content.getComponent("btnShop");
-	btnShop.setLocalLookAndFeel(LookAndFeel.iconButton);
-	btnShop.setControlCallback(onbtnShopControl);
-		
-	inline function onbtnShopControl(component, value)
+		g.setColour(Colours.withAlpha(obj.itemColour1, obj.hover || !obj.enabled ? 0.7 : 1.0));		 
+		g.fillPath(Paths.icons.add, [a[0] + a[2] / 2 - 26 / 2, a[1] + a[3] / 2 - 26 / 2, 26, 26]);	 
+		g.fillTriangle([20, 22, 8, 6], Math.toRadians(180)); 
+	});
+
+	cmbAddLaf.registerFunction("drawPopupMenuItem", function(g, obj)
 	{
-		if (!value && UserAccount.isOnline())
-			Engine.openWebsite(Config.baseURL[Config.MODE]);
-	}
+		LookAndFeel.drawPopupMenuItem(g, obj);
+	});	
+	
+	cmbAddLaf.registerFunction("getIdealPopupMenuItemSize", function(obj)
+	{
+		return LookAndFeel.getIdealPopupMenuItemSize(obj);
+	});
 	
 	// btnSupport
 	const btnSupport = Content.getComponent("btnSupport");
@@ -215,21 +189,6 @@ namespace LibraryHeader
 	inline function getHeight()
 	{
 		return pnlLibraryHeader.getHeight();
-	}
-	
-	inline function writeLastSync()
-	{
-		local f = appData.getChildFile("synctime.txt");
-		f.writeString(Engine.getSystemTime(false).substring(0, 8));
-	}
-	
-	inline function syncCooldown()
-	{
-		if (isDefined(pnlSyncCooldown))
-		{
-			pnlSyncCooldown.setValue(15);
-			pnlSyncCooldown.startTimer(500);			
-		}
 	}
 	
 	// Function calls
