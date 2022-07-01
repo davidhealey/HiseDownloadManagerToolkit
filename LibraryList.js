@@ -29,7 +29,7 @@ namespace LibraryList
 	
 	// pnlLibraryList
 	const pnlLibraryList = Content.getComponent("pnlLibraryList");
-	
+
 	pnlLibraryList.setPaintRoutine(function(g)
 	{
 		g.fillAll(0x00);
@@ -45,15 +45,15 @@ namespace LibraryList
 		else
 		{
 			var children = this.getChildPanelList();
-			
+
 			if (children.length > 0)
 			{
-				for (x in children)
+				for (c in children)
 				{
 					if (isDefined(Config.GRID_LAYOUT) && Config.GRID_LAYOUT)
-						GridItem.paint(x);
+						GridItem.paint(c);
 					else
-						ListItem.paint(x);
+						ListItem.paint(c);
 				}
 			}
 		}
@@ -77,10 +77,8 @@ namespace LibraryList
 		else
 			ListItem.create(pnlLibraryList, data, img);
 
-		pnlLibraryList.loadImage(img, data.name);
-		pnlLibraryList.repaint();
-
-		Config.GRID_LAYOUT ? GridItem.resizePanel(pnlLibraryList) : ListItem.resizePanel(pnlLibraryList);	
+		if (!pnlLibraryList.isImageLoaded(data.name))
+			pnlLibraryList.loadImage(img, data.name);
 	}
 	
 	inline function rebuildChildButtons(id)
@@ -90,10 +88,10 @@ namespace LibraryList
 			if (c.data.item.id == id)
 			{
 				ListItem.removeChildren(c);
-				Config.GRID_LAYOUT ? GridItem.addButtons(c) : ListItem.addButtons(c);				
+				Config.GRID_LAYOUT ? GridItem.addButtons(c) : ListItem.addButtons(c);
 				c.repaint();
 				break;
-			}				
+			}
 		}
 	}
 	
@@ -179,7 +177,7 @@ namespace LibraryList
 		for (x in data)
 			add(x);
 
-		pnlLibraryList.repaint();
+		resize();
 	}
 
 	inline function add(item)
@@ -204,6 +202,12 @@ namespace LibraryList
 		removeAllChildPanels();			
 		list.clear();
 	}
+	
+	inline function resize()
+	{
+		Config.GRID_LAYOUT ? GridItem.resizePanel(pnlLibraryList) : ListItem.resizePanel(pnlLibraryList);
+		pnlLibraryList.repaint();
+	}
 
 	inline function repaint()
 	{
@@ -223,14 +227,6 @@ namespace LibraryList
 		
 	inline function getImagePath(expName, id)
 	{
-		if (isDefined(expName))
-		{
-			 local img = Expansions.getImagePath(expName, "Icon.png");
-
-			 if (isDefined(img))
-			 	return img;
-		}			
-
 		if (isDefined(id))
 		{
 			local cache = appData.getChildFile("cache");
@@ -242,6 +238,14 @@ namespace LibraryList
 				if (isDefined(img) && img.isFile())
 					return img.toString(image.FullPath);
 			}
+		}
+
+		if (isDefined(expName))
+		{
+			 local img = Expansions.getImagePath(expName, "Icon.png");
+		
+			 if (isDefined(img))
+			 	return img;
 		}
 
 		return "{PROJECT_FOLDER}placeholder.png";

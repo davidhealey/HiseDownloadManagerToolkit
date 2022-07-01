@@ -32,97 +32,24 @@ namespace GridItem
 		p.setPosition(area[0], area[1], area[2], area[3]);
 		p.set("text", data.name);
 		p.set("tooltip", data.shortDescription);
-		p.set("bgColour", panel.get("bgColour"));
-		p.set("itemColour", panel.get("itemColour"));
-		p.set("itemColour2", panel.get("itemColour2"));
-		p.set("textColour", panel.get("textColour"));
+		p.set("bgColour", 0x0);
+		p.set("itemColour", 0x0);
+		p.set("itemColour2", 0x0);
+		p.set("textColour", 0x0);
 		p.data.item = data;
 		p.data.area = area;
 		p.data.img = img;
 
-		p.setPaintRoutine(function(g)
-		{
-			var a = this.getLocalBounds(0);
-
-			// Progress indicator
-			if (isDefined(this.data.item.progress))
-			{
-				var v = this.data.item.progress.value;
-				var diameter = a[2] / 1.4;
-				var arcArea = [a[0] + a[2] / 2 - diameter / 2, a[1] + a[2] / 2 - diameter / 2, diameter, diameter];
-
-				g.setColour(Colours.withAlpha(Colours.black, 0.5));
-				g.fillRect([a[0], a[1], a[2], a[2]]);
-
-				g.setColour(Colours.withAlpha(0xff363639, 0.8));
-				g.drawEllipse(arcArea, 13);
-				
-			    g.setColour(Colours.withAlpha(0xffeebd75, 1.0));
-			    var path = Content.createPath();
-			    var arcThickness = 0.05;
-			    var startOffset = 3.15;
-			    var endOffset = -startOffset + 2.0 * startOffset * v;
-			    
-			    endOffset = Math.max(endOffset, -startOffset + 0.01);
-			    path.addArc(arcArea, -startOffset, endOffset);
-			
-			    g.drawPath(path, pathArea, this.getWidth() * arcThickness);
-
-				g.setFont("semibold", 22);
-				g.setColour(this.get("textColour"));
-			    g.drawAlignedText(parseInt(Math.ceil(v * 100)) + "%", [a[0], a[1] + a[2] / 2 - 50, a[2], 25], "centred");
-
-				g.setFont("semibold", 16);
-				g.drawFittedText(this.data.item.progress.action, [arcArea[0], a[1] + a[2] / 2 - 27, arcArea[2], 30], "centred", 1, 1.0);
-
-				g.setFont("regular", 16);
-				if (isDefined(this.data.item.progress.status))
-					g.drawFittedText(this.data.item.progress.status, [arcArea[0], a[1] + a[2] / 2 - 3, arcArea[2], 30], "centred", 1, 1.0);
-				
-				g.setFont("semibold", 14);
-				if (isDefined(this.data.item.progress.speed))
-					g.drawFittedText(this.data.item.progress.speed, [arcArea[0], a[1] + a[2] / 2 + 20, arcArea[2], 30], "centred", 1, 1.0);
-			}
-
-			g.setFont("medium", 16);
-			g.setColour(Colours.withAlpha(this.get("textColour"), isDefined(this.data.item.installedVersion) ? 1.0 : 0.8));
-
-			if (isDefined(this.data.item.displayName))
-				g.drawFittedText(this.data.item.displayName, [a[0], a[3] - 48, a[2] - 75 - (20 * isDefined(this.data.item.hasUpdate)), 30], "left", 2, 1.0);
-			else
-				g.drawFittedText(this.data.item.name, [a[0], a[3] - 48, a[2] - 75 - (20 * isDefined(this.data.item.hasUpdate)), 25], "left", 2, 1.0);
-		});
-
 		addButtons(p);
-		
+
 		return p;
-	}
-	
-	inline function paint(p)
-	{
-		local a = [p.get("x"), p.get("y"), p.getWidth(), p.getHeight()];
-		
-		if (this.isImageLoaded(p.data.item.name))
-		{
-			if (isDefined(p.data.item.installedVersion))
-				g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
-			
-			g.setColour(Colours.withAlpha(Colours.white, isDefined(p.data.item.installedVersion) ? 1.0 : 0.7));						
-			g.drawImage(p.data.item.name, [a[0], a[1], a[2], a[2]], 0, 0);
-		}
-		
-		if (isDefined(p.data.img) && p.data.img.indexOf("placeholder") != -1)
-		{
-			g.setColour(p.get("textColour"));
-			g.setFont("medium", 22 - Config.GRID_NUM_COLS);
-			g.drawFittedText(p.data.item.name, [a[0] + a[2] / 15, a[1] + a[2] / 3, a[2] - a[2] / 15 * 2, a[2] - a[2] / 3 * 2], "centred", 2, 1);
-		}
 	}
 	
 	inline function addButtons(p)
 	{
 		local data = p.data.item;
 		local area = p.data.area;
+		p.data.buttons = [];
 
 		if (!isDefined(data.progress))
 		{
@@ -130,7 +57,8 @@ namespace GridItem
 			{
 				p.data.btnUninstall = createActionButton(p, [area[2] - 20, area[2] + 10, 17, 19], "trash", "Uninstall");
 				p.data.btnUninstall.setControlCallback(LibraryItem.onbtnUninstallControl);
-				
+				p.data.buttons.push(p.data.btnUninstall);
+
 				if ((isDefined(data.hasLicense) && data.hasLicense || data.regularPrice == "0") && (isDefined(data.hasUpdate) && data.hasUpdate))
 					p.data.btnInstall = createActionButton(p, [area[2] - 90, area[2] + 10, 15, 19], "bell", "Update");
 
@@ -138,6 +66,7 @@ namespace GridItem
 				{
 					p.data.btnLoad = createActionButton(p, [area[2] - 57, area[2] + 10, 19, 19], "playCircle", "Load");
 					p.data.btnLoad.setControlCallback(LibraryItem.onbtnLoadControl);
+					p.data.buttons.push(p.data.btnLoad);
 				}				
 			}
 			else 
@@ -151,6 +80,7 @@ namespace GridItem
 					p.data.btnBuy = createActionButton(p, [area[2] - 30, area[2] + 10, 12, 19], "dollar", "Buy");
 					p.data.btnBuy.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
 					p.data.btnBuy.setControlCallback(LibraryItem.onbtnBuyControl);
+					p.data.buttons.push(p.data.btnBuy);
 				}
 			}
 
@@ -158,6 +88,7 @@ namespace GridItem
 			{
 				p.data.btnInstall.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent() && (!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN));
 				p.data.btnInstall.setControlCallback(LibraryItem.onbtnInstallControl);
+				p.data.buttons.push(p.data.btnInstall);
 			}
 		}
 		else
@@ -165,6 +96,7 @@ namespace GridItem
 			// btnCancel
 			p.data.btnCancel = createActionButton(p, [area[2] - 25, area[2] + 13, 15, 15], "x", "Cancel");
 			p.data.btnCancel.setControlCallback(LibraryItem.onbtnCancelControl);
+			p.data.buttons.push(p.data.btnCancel);
 		}
 
 		// btnRating
@@ -177,73 +109,16 @@ namespace GridItem
 		local b = parent.addChildPanel();
 
 		b.setPosition(area[0], area[1], area[2], area[3]);
-		b.set("bgColour", parent.get("itemColour2"));
-		b.set("text", text);
+		b.set("bgColour", 0x0);
+		b.set("itemColour", 0x0);
+		b.set("itemColour2", 0x0);
+		b.set("textColour", 0x0);
 		b.set("tooltip", text + " " + parent.get("text") + ".");
 		b.set("allowCallbacks", "Clicks & Hover");
 		b.data.icon = icon;
-
-	    b.setPaintRoutine(function(g)
-	    {
-			var a = this.getLocalBounds(0);
-
-			g.setColour(Colours.withAlpha(this.get("bgColour"), this.data.hover ? 1.0 : 0.8));
-			
-			if (!this.get("enabled"))
-				g.setColour(Colours.withAlpha(this.get("bgColour"), 0.3));
-				
-			
-			g.fillPath(Paths.icons[this.data.icon], a);
-	    });
+		b.data.area = area;
 
 		b.setMouseCallback(LibraryItem.momentaryButtonMouseCallback);
-		
-		return b;
-	}
-	
-	inline function createLoadButton(parent, area)
-	{
-		local b = parent.addChildPanel();
-		
-		b.setPosition(area[0], area[1], area[2], area[3]);
-		b.set("bgColour", bgColour);
-		b.set("text", text);
-		b.set("tooltip", "Load " + parent.get("text") + ".");
-		b.set("allowCallbacks", "All Callbacks");
-		b.data.icon = icon;
-	
-	    b.setPaintRoutine(function(g)
-	    {
-			var a = this.getLocalBounds(0);
-
-			if (this.data.hover && !Downloader.getQueueLength())
-			{
-				g.setColour(Colours.withAlpha(Colours.black, 0.3));
-				g.fillRect(a);
-
-				g.setColour(Colours.withAlpha(Colours.white, this.data.buttonHover ? 1.0 : 0.8));	
-				g.fillPath(Paths.icons.playCircle, Rect.reduced(a, a[2] / 4));			
-			}
-	    });
-
-		b.setMouseCallback(function(event)
-		{
-			this.data.buttonHover = false;
-
-			if (event.x > this.getWidth() / 4 && event.x < this.getWidth() - this.getWidth() / 4)
-				if (event.y > this.getHeight() / 4 && event.y < this.getHeight() - this.getHeight() / 4)	
-					this.data.buttonHover = true;
-
-			this.data.hover = event.hover;
-
-			if (event.clicked || event.mouseUp)
-			{
-				this.setValue(event.clicked && !event.mouseUp);
-				this.changed();
-			}
-			
-			this.repaint();
-		});
 		
 		return b;
 	}
@@ -300,20 +175,107 @@ namespace GridItem
 	
 	inline function resizePanel(panel)
 	{
-		local numItems = panel.getChildPanelList().length;
-		local viewport = Content.getAllComponents(panel.get("parentComponent"))[0];
-
-		local numRows = Math.ceil(numItems / Config.GRID_NUM_COLS);		
-
-		if (numRows * panel.getWidth() / Config.GRID_NUM_COLS < viewport.getHeight())
-			panel.set("width", viewport.get("width"));
-		else
-			panel.set("width", viewport.get("width") - parseInt(viewport.get("scrollBarThickness")));
-		
+		local numItems = panel.getChildPanelList().length;	
+		local viewport = Content.getAllComponents(panel.get("parentComponent"))[0];		
+		local numRows = Math.ceil(numItems / Config.GRID_NUM_COLS);
 		local colWidth = panel.getWidth() / Config.GRID_NUM_COLS;
 		local rowHeight = colWidth + 30;
 		local height = numRows * rowHeight + (Config.GRID_VERTICAL_MARGIN * (numRows - 1));
-		
+
+		if (!numItems)
+			height = viewport.getHeight();
+
 		panel.set("height", height);
+	}
+	
+	inline function paint(p)
+	{
+		local a = [p.get("x"), p.get("y"), p.getWidth(), p.getHeight()];
+		local style = Theme.getProperty("libraryItem");
+		local textColour = LookAndFeel.formatColour(style.textColour);
+		
+		g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
+	
+		g.setColour(Colours.withAlpha(Colours.white, isDefined(p.data.item.installedVersion) ? 1.0 : 0.7));
+	
+		if (this.isImageLoaded(p.data.item.name))
+		{
+			g.drawImage(p.data.item.name, [a[0], a[1], a[2], a[2]], 0, 0);
+
+			if (p.data.img.indexOf("placeholder") != -1)
+			{
+				g.setColour(textColour);
+				g.setFont("medium", 22 - Config.GRID_NUM_COLS);
+				g.drawFittedText(p.data.item.name, [a[0] + a[2] / 15, a[1] + a[2] / 3, a[2] - a[2] / 15 * 2, a[2] - a[2] / 3 * 2], "centred", 2, 1);				
+			}			
+		}
+		
+		// Progress indicator
+		if (isDefined(p.data.item.progress))
+		{
+			local v = p.data.item.progress.value;
+			local diameter = a[2] / 1.4;
+			local arcArea = [a[0] + a[2] / 2 - diameter / 2, a[1] + a[2] / 2 - diameter / 2, diameter, diameter];
+			
+			g.setColour(Colours.withAlpha(Colours.black, 0.5));
+			g.fillRect([a[0], a[1], a[2], a[2]]);
+			
+			g.setColour(Colours.withAlpha(LookAndFeel.formatColour(style.progressBg), 0.8));
+			g.drawEllipse(arcArea, 13);
+	
+		    g.setColour(Colours.withAlpha(LookAndFeel.formatColour(style.progressFg), 1.0));
+		    
+		    local path = Content.createPath();
+		    local arcThickness = 0.05;
+		    local startOffset = 3.15;
+		    local endOffset = -startOffset + 2.0 * startOffset * v;
+		    
+		    endOffset = Math.max(endOffset, -startOffset + 0.01);
+		    path.addArc(arcArea, -startOffset, endOffset);
+		
+		    g.drawPath(path, pathArea, p.getWidth() * arcThickness);
+			
+			g.setFont("semibold", 22);
+			g.setColour(textColour);
+		    g.drawAlignedText(parseInt(Math.ceil(v * 100)) + "%", [a[0], a[1] + a[2] / 2 - 50, a[2], 25], "centred");
+			
+			g.setFont("semibold", 16);
+			g.drawFittedText(p.data.item.progress.action, [arcArea[0], a[1] + a[2] / 2 - 27, arcArea[2], 30], "centred", 1, 1.0);
+			
+			g.setFont("regular", 16);
+			
+			if (isDefined(p.data.item.progress.status))
+				g.drawFittedText(p.data.item.progress.status, [arcArea[0], a[1] + a[2] / 2 - 3, arcArea[2], 30], "centred", 1, 1.0);
+			
+			g.setFont("semibold", 14);
+			
+			if (isDefined(p.data.item.progress.speed))
+				g.drawFittedText(p.data.item.progress.speed, [arcArea[0], a[1] + a[2] / 2 + 20, arcArea[2], 30], "centred", 1, 1.0);
+		}
+	
+		g.setFont("medium", 18);
+		g.setColour(Colours.withAlpha(textColour, isDefined(p.data.item.installedVersion) ? 1.0 : 0.8));
+
+		if (isDefined(p.data.item.displayName))
+			g.drawMultiLineText(p.data.item.displayName, [a[0], a[1] + a[3] - 30], a[2] - 75 - (25 * isDefined(p.data.item.hasUpdate)), "left", 1.0);
+		else
+			g.drawMultiLineText(p.data.item.name, [a[0], a[1] + a[3] - 30], a[2] - 75 - (25 * isDefined(p.data.item.hasUpdate)), "left", 1.0);
+
+		// Paint buttons
+		if (isDefined(p.data.buttons))
+			for (b in p.data.buttons)
+				paintButton(p, b);
+	}
+	
+	inline function paintButton(p, b)
+	{
+		local a = [p.get("x") + b.data.area[0], p.get("y") + b.data.area[1], b.data.area[2], b.data.area[3]];
+	
+		g.setColour(Colours.withAlpha(this.get("textColour"), b.data.hover ? 1.0 : 0.7));
+		
+		if (!this.get("enabled"))
+			g.setColour(Colours.withAlpha(this.get("textColour"), 0.3));
+	
+		g.fillPath(Paths.icons[b.data.icon], a);
 	}
 }

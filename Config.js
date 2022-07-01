@@ -11,7 +11,7 @@ namespace Config
 	const LIST_ROW_HEIGHT = 200; // Height of each list item
 	const GRID_NUM_COLS = 4;
 	const GRID_MARGIN = 25;
-	const GRID_VERTICAL_MARGIN = 10;
+	const GRID_VERTICAL_MARGIN = 15;
 	const GRID_USE_LOAD_BUTTON = true;
 	const DEV_FOLDER = "/media/dave/Work/Projects/Libre Player/libreplayer mkv";
 	

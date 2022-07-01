@@ -13,7 +13,7 @@ namespace LibraryItem
 			this.changed();		
 		}
 		
-		this.repaint();
+		LibraryList.repaint();
 	}
 	
 	// btnInstall
