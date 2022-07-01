@@ -29,6 +29,7 @@ namespace Variations
 
 	// btnVariationsCancel
 	const btnVariationsCancel = Content.getComponent("btnVariationsCancel");
+	btnVariationsCancel.setLocalLookAndFeel(LookAndFeel.textButton);
 	btnVariationsCancel.setControlCallback(onbtnVariationsCancelControl);
 	
 	inline function onbtnVariationsCancelControl(component, value)
@@ -39,28 +40,30 @@ namespace Variations
 
 	// btnVariationsSubmit
 	const btnVariationsSubmit = Content.getComponent("btnVariationsSubmit");
+	btnVariationsSubmit.setLocalLookAndFeel(LookAndFeel.textButton);
 	btnVariationsSubmit.setControlCallback(onbtnVariationsSubmitControl);
 	
 	inline function onbtnVariationsSubmitControl(component, value)
 	{
 		if (value)
 		{
-			hide();
 			item.variation = item.variations[cmbVariations.getValue() - 1].id;
 			LibraryList.passToDownloader(item);
+			hide();
 		}
 	}
 	
 	// cmbVariations
 	const cmbVariations = Content.getComponent("cmbVariations");
-	
+	cmbVariations.setLocalLookAndFeel(LookAndFeel.comboBox);
+
 	// Functions
 	inline function populateComboBox(variations)
 	{
 		local options = [];
 		
 		for (x in variations)
-			options.push(x.edition);			
+			options.push(x.name);			
 
 		cmbVariations.set("items", options.join("\n"));
 		cmbVariations.setValue(1);
@@ -68,12 +71,12 @@ namespace Variations
 	
 	inline function show()
 	{
-		pnlVariations.showControl(false);
+		pnlVariations.showControl(true);
 	}
 	
 	inline function hide()
 	{
-		pnlVariations.showControl(true);
+		pnlVariations.showControl(false);
 	}
 	
 	inline function getVariation(data)
