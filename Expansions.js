@@ -494,6 +494,8 @@ namespace Expansions
 	
 	inline function setCredentials(value)
 	{
+		if (!isDefined(Config.ENCODE_EXPANSIONS) && Config.ENCODE_EXPANSIONS) return;
+
 		if (isDefined(value))
 			expHandler.setCredentials({"username": value});
 	}
@@ -502,4 +504,7 @@ namespace Expansions
 	{
 		return expHandler.getCurrentExpansion();
 	}
-}	
+
+	// Function calls
+	setCredentials(FileSystem.getSystemId());
+}
