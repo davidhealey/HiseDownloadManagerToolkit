@@ -22,7 +22,8 @@ namespace Library
 	
 	const appData = FileSystem.getFolder(FileSystem.AppData);
 	reg cache = appData.createDirectory("cache");
-	reg nest = {}; // Variables used inside nested functions	
+	reg nest = {}; // Variables used inside nested functions
+	reg appDownload;
 	
 	// pnlLibrary
 	const pnlLibrary = Content.getComponent("pnlLibrary");
@@ -302,7 +303,7 @@ namespace Library
 			}
 			else
 			{
-				nest.msg = "The server reported an error, please try again or contact support.";
+				nest.msg = "The server reported an error, please try again later or contact support.";
 				ErrorHandler.serverError(status, response, nest.msg);
 				Spinner.hide();
 			}
@@ -330,14 +331,14 @@ namespace Library
 		local headers = ["Authorization: Bearer " + UserAccount.getToken()];
 		local endpoint = Config.apiPrefix + "check_for_app_update";
 		local p = {
-			"app_name": Config.APP_NAME,
-			"installed_version": Engine.getVersion(),
-			"user_os": Engine.getOS()
+			app_name: Config.APP_NAME,
+			user_version: Engine.getVersion(),
+			user_os: Engine.getOS(),
+			allow_beta: UserSettings.getValue("beta")
 		};
 
         Server.setHttpHeader(headers.join("\n"));
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
-		Server.cleanFinishedDownloads();
 
 		Spinner.show("Syncing");
 
@@ -347,13 +348,14 @@ namespace Library
 			{	
 				if (response[0] != false)
 				{
-					nest.msg = "A new version of " + Engine.getName() + " is available. Would you like to download the installer now?";
+					var msg = "A new version of " + Engine.getName() + " is available. Would you like to download the installer now?";
 					nest.url = response[0];
+					nest.filename = response[1];
 
-					Engine.showYesNoWindow("Update", nest.msg, function(action)
+					Engine.showYesNoWindow("Update", msg, function(action)
 					{
 						if (action)
-							downloadAppUpdate(nest.url);
+							downloadAppUpdate(nest.url, nest.filename);
 					});
 				}
 			}
@@ -366,47 +368,63 @@ namespace Library
 		});
 	}
 		
-	inline function downloadAppUpdate(url)
+	inline function downloadAppUpdate(url, filename)
 	{
-		local filename = url.substring(url.lastIndexOf("/") + 1, url.length);
-		nest.dir = FileSystem.getFolder(FileSystem.Downloads);
-		nest.f = nest.dir.getChildFile(filename);
-		
-		Server.setHttpHeader("");
-		Server.setBaseURL(Config.webPrefix[Config.MODE]);
-		
-		Spinner.show("Downloading Update");
+		nest.f = FileSystem.getFolder(FileSystem.Downloads).getChildFile(filename);
+		local prefix = url.substring(0, url.indexOf("://") + 3);
 
-		Server.downloadFile(url.replace(Config.webPrefix[Config.MODE]), {}, nest.f, function()
+		Server.setHttpHeader("");
+		Server.setBaseURL(prefix);
+		Server.cleanFinishedDownloads();
+
+		Spinner.show("Downloading Update");
+		btnCancelAppUpdate.showControl(true);
+
+		appDownload = Server.downloadFile(url.replace(prefix), {}, nest.f, function()
 		{
 			if (this.data.finished)
 			{
 				if (this.data.success)
 				{
-					Engine.showYesNoWindow("Success", "The download is complete. Would you like to exit and run the update installer?", function(action)
+					Engine.showYesNoWindow(l10n.get("Success"), l10n.get("The download is complete. Would you like to exit and run the update installer?"), function(action)
 					{
 						if (action)
 						{
-							if (nest.f.setExecutePermission(true))
-								nest.f.startAsProcess("");
+							if (nest.f.setExecutePermission(true) && Engine.getOS() != "LINUX")
+								nest.f.startAsProcess("");								
 							else
-								nest.dir.show();
-	
-							Engine.quit();						
-						}
+								FileSystem.fromAbsolutePath(nest.f.toString(nest.f.FullPath)).show();
+
+							Engine.quit();
+						}							
 					});
 				}
 				else
 				{
-					Engine.showMessageBox("Error", "The download was unsuccessful, please contact support.", 3);
+					Engine.showMessageBox("Error", "The download was unsuccessful.", 3);
 				}
-
+				
+				appDownload = undefined;
 				Spinner.hide();
+				btnCancelAppUpdate.showControl(false);
 			}
 			else
 			{
 				Spinner.show("Downloading: " + Math.round(this.getProgress() * 100) + "%");
 			}
+		});
+	}
+	
+	inline function cancelAppUpdate()
+	{	
+		Engine.showYesNoWindow("Cancel", l10n.get("Are you sure you want to cancel the update?"), function(response)
+		{
+			if (response && isDefined(appDownload))
+			{
+				appDownload.abort();
+				Spinner.hide();
+				btnCancelAppUpdate.showControl(false);
+			}				
 		});
 	}
 
