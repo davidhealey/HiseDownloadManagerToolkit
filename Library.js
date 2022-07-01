@@ -92,20 +92,12 @@ namespace Library
 							{
 								data = x;
 							}
-							else if (isDefined(x.variations))
+							else if (x.regularPrice == "0")
 							{
-								for (v in x.variations)
-								{
-									if (v.hasLicense && !isDefined(v.installedVersion))
-										data = x; break;
-								}
+								data = x;
 							}
 						}
 						else if (value == 4 && isDefined(x.hasUpdate) && x.hasUpdate)
-						{
-							data = x;
-						}
-						else if (value == 5 && x.regularPrice == "0")
 						{
 							data = x;
 						}
@@ -113,7 +105,7 @@ namespace Library
 						if (isDefined(data))
 							result.push(data);
 
-						break;	
+						break;
 					}
 				}
 			}
