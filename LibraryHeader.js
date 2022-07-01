@@ -124,6 +124,17 @@ namespace LibraryHeader
 			Engine.openWebsite(Config.baseURL[Config.MODE] + Config.supportURL);
 	}
 	
+	// btnSettings
+	const btnSettings = Content.getComponent("btnSettings");
+	btnSettings.setLocalLookAndFeel(LookAndFeel.iconButton);
+	btnSettings.setControlCallback(onbtnSettingsControl);
+		
+	inline function onbtnSettingsControl(component, value)
+	{
+		if (!value)
+			UserSettings.show();
+	}
+	
 	// lblSearch
 	const lblSearch = Content.getComponent("lblSearch");
 	lblSearch.setControlCallback(onlblSearchControl);
