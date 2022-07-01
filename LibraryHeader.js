@@ -163,8 +163,6 @@ namespace LibraryHeader
 	inline function setEnabledStateOfButtons()
 	{
 		btnSync.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
-		btnAddLicense.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
-		btnShop.set("enabled", Server.isOnline());
 		btnSupport.set("enabled", UserAccount.isOnlineAndIsLoggedInSilent());
 	}
 	
@@ -172,8 +170,7 @@ namespace LibraryHeader
 	{
 		btnLogout.set("enabled", state);
 		btnSync.set("enabled", state && UserAccount.isOnlineAndIsLoggedInSilent());
-		btnAddLicense.set("enabled", state && UserAccount.isOnlineAndIsLoggedInSilent());
-		btnManualInstall.set("enabled", state);
+		cmbAdd.set("enabled", state && UserAccount.isOnlineAndIsLoggedInSilent());
 	}
 	
 	inline function getSearchQuery()
