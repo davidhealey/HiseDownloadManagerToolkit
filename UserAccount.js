@@ -340,7 +340,7 @@ namespace UserAccount
 		local f = appData.getChildFile("credentials.json");
 
 		authToken = token;
-		f.writeEncryptedObject(data, Config.encryptionKey);
+		f.writeEncryptedObject(data, parseInt(Config.encryptionKey));
      }
     
 	inline function loadToken()
@@ -349,11 +349,7 @@ namespace UserAccount
 
 		if (isDefined(f) && f.isFile())
 		{
-			local data = f.loadEncryptedObject(Config.encryptionKey);
-			
-			if (isDefined(Config.ENCODE_EXPANSIONS) && Config.ENCODE_EXPANSIONS)
-				Expansions.setCredentials(data.username);
-				
+			local data = f.loadEncryptedObject(parseInt(Config.encryptionKey));			
 			return data.token;
 		}
 
