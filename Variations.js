@@ -23,15 +23,8 @@ namespace Variations
 	const pnlVariations = Content.getComponent("pnlVariations");
 	
 	pnlVariations.setPaintRoutine(function(g)
-	{
-		var a = this.getLocalBounds(10);
-		
-		LookAndFeel.floatingWindowBackground(g);		
-		LookAndFeel.drawInput(cmbVariations, {id: "codeBranch", width: 15, height: 17});
-
-		g.setFont("medium", 24);
-		g.setColour(this.get("textColour"));
-		g.drawAlignedText("Select Edition", [0, cmbVariations.get("y") - 60, this.getWidth(), 30], "centred");
+	{		
+		LookAndFeel.fullPageBackground("Edition", "Select the edition to install.", ["codeBranch", 44, 50]);
 	});	
 
 	// btnVariationsCancel

@@ -25,19 +25,10 @@ namespace AddLicense
 		var a = this.getLocalBounds(0);
 		var lblArea = [lblAddLicense.get("x") - 5, lblAddLicense.get("y"), lblAddLicense.getWidth() + 10, lblAddLicense.getHeight()];
 
-		g.fillAll(this.get("bgColour"));
+		LookAndFeel.fullPageBackground("Enter License Key", "The license will be added to your account.", ["key", 50, 28]);
 	
 		g.setColour(lblAddLicense.get("bgColour"));
 		g.fillRoundedRectangle(lblArea, 3);
-				
-		g.setFont("semibold", 26);
-		g.setColour(this.get("textColour"));
-		g.drawAlignedText("Enter License Key", [0, 70, a[2], 50], "centred");
-		
-		g.setFont("regular", 20);
-		g.drawAlignedText("The license will be added to your account.", [0, 240, a[2], 50], "centred");
-		
-		g.fillPath(Paths.icons["key"], [a[0] + a[2] / 2 - 40 / 2, 165, 50, 28]);
 	});
 
 	// lblAddLicense
