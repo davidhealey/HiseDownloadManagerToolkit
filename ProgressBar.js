@@ -33,6 +33,8 @@ namespace ProgressBar
 		{
 			this.stopTimer();
 		}
+
+		LibraryList.repaint();
 	});
 
 	// Functions

@@ -30,28 +30,33 @@ namespace Library
 	pnlLibrary.setPaintRoutine(function(g)
 	{
 		var a = this.getLocalBounds(0);
-	
 		g.fillAll(this.get("bgColour"));
-	
-		g.setColour(this.get("textColour"));
-		g.fillPath(Paths.librewave, [a[2] - 140, a[3] - 31, 128, 15]);
 	});
 	
+	// btnCancelAppUpdate
+	const btnCancelAppUpdate = Content.getComponent("btnCancelAppUpdate");
+	btnCancelAppUpdate.showControl(false);
+	btnCancelAppUpdate.setLocalLookAndFeel(LookAndFeel.textButton);
+	btnCancelAppUpdate.setControlCallback(onbtnCancelAppUpdateControl);
+	
+	inline function onbtnCancelAppUpdateControl(component, value)
+	{
+		if (!value)
+			cancelAppUpdate();
+	}
+
 	// Functions
 	inline function autoSync()
 	{
-		if ((!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN) && Server.isOnline() && isDefined(UserAccount.getToken()))
+		if ((!Engine.isPlugin() || Config.NETWORK_IN_PLUGIN) && Server.isOnline() && isDefined(UserAccount.getToken()) && UserSettings.getValue("autoSync"))
 		{
-			local lastSync = readLastSync();
-	
-			if (isDefined(lastSync) && typeof lastSync == "string")
-			{
-				local today = getTimeStampInDays(Engine.getSystemTime(false));
-				local lastDays = getTimeStampInDays(lastSync);
+			local lastSync = UserSettings.getValue("synctime");
+			local today = Engine.getSystemTime(false).substring(0, 8);
 
-				if (Math.abs(today - lastDays) > 6)
-					rebuildCache();
-			}
+			if (lastSync != today)
+				rebuildCache();
+
+			UserSettings.setValue("synctime", today);
 		}
 	}
 
@@ -59,7 +64,7 @@ namespace Library
 	{
 		local result = [];
 		local value = LibraryHeader.getFilterValue();
-		
+
 		if (isDefined(items))
 		{
 			for (x in items)
@@ -419,30 +424,8 @@ namespace Library
 		ProgressBar.stop();
 		updateCatalogue();
 	}
-	
-	inline function readLastSync()
-	{
-		local f = appData.getChildFile("synctime.txt");
-		
-		if (f.isFile())
-			return f.loadAsString();
-
-		return false;
-	}
-	
-	inline function getTimeStampInDays(dateString)
-	{    
-	    local timeStamp = Math.round(dateString.substring(6, 8))           // Days
-	                    + Math.round(dateString.substring(4, 6)) * 30      // Months
-	                    + Math.round(dateString.substring(0, 4)) * 365;    // Years
-
-	    return timeStamp;
-	}
 
 	// Function calls
-	if (!Engine.isPlugin())
-	{
-		autoSync();
-		updateCatalogue();
-	}
+	autoSync();
+	updateCatalogue();
 }

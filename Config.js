@@ -37,7 +37,7 @@ namespace Config
 	{
 		local filename = "";
 		local appData = FileSystem.getFolder(FileSystem.AppData);
-		
+				
 		switch (Engine.getOS())
 		{
 			case "OSX": filename = "LinkOSX"; break;

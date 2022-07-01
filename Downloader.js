@@ -35,7 +35,7 @@ namespace Downloader
 		
 		this.stopTimer();
 	});
-
+		
 	// Functions
 	inline function downloadItem()
 	{
@@ -116,8 +116,14 @@ namespace Downloader
 		local endpoint =  Config.apiPrefix + "get_downloads";
 		local version = isDefined(data.installedVersion) ? data.installedVersion : 0;
 		local id = isDefined(data.variation) ? data.variation : data.id;
-		local filter = "";
-		local p = {"product_id": id, "user_os": Engine.getOS(), "user_version": version, "filter": filter};
+
+		local p = {
+			product_id: id,
+			user_os: Engine.getOS(),
+			user_version: version,
+			allow_beta: UserSettings.getValue("beta"),
+			filter: ""
+		};
 
 		Server.setHttpHeader(headers.join("\n"));
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
@@ -180,7 +186,7 @@ namespace Downloader
 
 		removeFromQueue(data);
 	}
-	
+		
 	inline function postDownload()
 	{
 		ProgressBar.clear();

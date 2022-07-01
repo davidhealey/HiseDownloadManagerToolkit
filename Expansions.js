@@ -39,7 +39,7 @@ namespace Expansions
 			unpackZips(sampleDir);
 		}
 	}
-	
+
 	inline function unload(expName)
 	{
 		for (e in expList)
@@ -52,7 +52,7 @@ namespace Expansions
 	inline function manualInstall()
 	{
 		FilePicker.show({
-			startFolder: FileSystem.Downloads, 
+			startFolder: FileSystem.getFolder(FileSystem.Downloads),
 			mode: 0,
 			filter: "*.zip",
 			title: "Install from Zip Files",
@@ -82,17 +82,14 @@ namespace Expansions
 					nest.startFolder = getSampleFolder(nest.expName);
 					
 					if (zips.length > 0)
-					{
-						if (!isDefined(nest.startFolder))
-							nest.startFolder = FileSystem.Desktop;
-							
+					{							
 						FilePicker.show(
 						{
-							startFolder: nest.startFolder,
+							startFolder: UserSettings.getDefaultSampleFolder(),
 							mode: 1,
 							filter: "",
 							title: "Install from Zip Files",
-							icon: ["hdd", 45, 60],
+							icon: ["hdd", 60, 60],
 							message: "Choose a location to install the samples.",
 							buttonText: "Install"
 						}, selectSampleInstallLocationCallback);
@@ -390,7 +387,7 @@ namespace Expansions
 			}
 			else
 			{
-				msg = "The uninstallation completed but sample directory could not be found.";
+				msg = "The uninstallation completed but the sample directory could not be found.";
 			}
 			
 			e.unloadExpansion();
@@ -471,7 +468,7 @@ namespace Expansions
 			
 		return undefined;
 	}
-	
+
 	inline function getImagePath(expName, imgName)
 	{
 		local e = expHandler.getExpansion(expName);
@@ -479,7 +476,7 @@ namespace Expansions
 		if (isDefined(e))
 		{
 			if (imgName == "Icon.png")
-				return e.getWildcardReference(imgName);	
+				return e.getWildcardReference(imgName);				
 
 			local images = e.getImageList();
 

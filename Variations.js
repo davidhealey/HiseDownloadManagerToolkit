@@ -36,7 +36,7 @@ namespace Variations
 		if (value)
 			hide();
 	}
-	
+
 	// btnVariationsSubmit
 	const btnVariationsSubmit = Content.getComponent("btnVariationsSubmit");
 	btnVariationsSubmit.setControlCallback(onbtnVariationsSubmitControl);

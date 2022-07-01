@@ -21,14 +21,14 @@ namespace UserAccount
 
 	reg authToken = loadToken();
 	reg online = Server.isOnline();;
-    
+
     // pnlLogin
     const pnlLogin = Content.getComponent("pnlLogin");
     
     pnlLogin.setPaintRoutine(function(g)
     {
     	var a = this.getLocalBounds(0);
-    
+
     	g.setColour(this.get("bgColour"));
     	g.fillRoundedRectangle(a, 5);
     
@@ -48,7 +48,7 @@ namespace UserAccount
     
     // lblUsername
     const lblUsername = Content.getComponent("lblUsername");
-    	
+
     // lblPassword 
     const lblPassword = Content.getComponent("lblPassword");
     lblPassword.set("fontStyle", "Password");
@@ -136,7 +136,7 @@ namespace UserAccount
     
     	g.setColour(this.get("bgColour"));
     	g.fillRoundedRectangle(a, 5);
-    	
+
     	g.setFont("medium", 26);
     	g.setColour(this.get("textColour"));
     	g.drawAlignedText("Create New Account", [lblRegisterEmail.get("x") + 25, lblRegisterEmail.get("y") - 60, lblRegisterEmail.getWidth(), 30], "left");
@@ -269,7 +269,7 @@ namespace UserAccount
 
 		if (!isDefined(password) || password == "")
 			return Engine.showMessageBox("Invalid Password", "Please enter a valid password.", 3);
-        
+
         Server.setHttpHeader("");
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
         
@@ -330,7 +330,7 @@ namespace UserAccount
      {
 		local data = {"username": username, "token": token};
 		local f = appData.getChildFile("credentials.json");
-		
+
 		authToken = token;
 		f.writeEncryptedObject(data, Config.encryptionKey);
      }
@@ -383,10 +383,10 @@ namespace UserAccount
 
 		if (!online)
 			return Engine.showMessageBox("Offline Mode", "An internet connection is required.", 1);
-			
+
 		if (!isDefined(authToken))
 			return Engine.showMessageBox("Login Required", "You need to login to use this feature.", 1);
-			
+				
 		if (Engine.isPlugin() && !Config.NETWORK_IN_PLUGIN)
 			return Engine.showMessageBox("Standalone Only", "This feature is only available in the standalone application.", 1);
 		
