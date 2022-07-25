@@ -17,6 +17,13 @@
 
 namespace ErrorHandler
 {
+	const eh = Engine.createErrorHandler();	
+
+	eh.setErrorCallback(function(level, message)
+	{
+		Engine.showMessageBox("test", message, level);
+	});	
+	
 	inline function serverError(status, response, defaultMsg)
 	{
 		local msg = defaultMsg;
@@ -35,39 +42,34 @@ namespace ErrorHandler
 			}
 		}
 		else
-		{
-			msg = "###Error " + status + "\n\r";
-			
+		{			
 			switch (status)
 			{
 				case 400:
-					msg += "Bad request.";
+					msg = "Bad request.";
 					break;
 					
 				case 401:
-					msg += "You are not authorized to do that.  Check that you are logged in.";
+					msg = "You are not authorized to do that.  Check that you are logged in.";
 					break;
 					
-				case 404: case 410: case 503:
-					msg += "The server might be down, please try again later.";
+				case 0: case 404: case 410: case 503:
+					msg = "The server might be down, please try again later.  If the problem persists contact support.";
 					break;
 				case 408: case 504: case 522: case 524:
-					msg += "A timeout occurred.";	
+					msg = "A timeout occurred. Please try again later.";
 					break;
 					
 				case 429:
-					msg += "The server has received too many requests.";
+					msg = "The server has received too many requests. Please try again later.";
 					break;
 					
 				default:
 					if (defaultMsg != "")
 						msg = defaultMsg;
 					else
-						msg += "A server error was encountered.";
+						msg = "A server error was encountered. Please try again later.";
 			}
-			
-			if (defaultMsg == "")
-				msg += "  If the problem persists, please contact support.";
 		}
 
 		if (isDefined(msg))
@@ -76,6 +78,6 @@ namespace ErrorHandler
 	
 	inline function showError(title, msg)
 	{
-		Engine.showMessageBox(title, msg, 1);
+		Engine.showMessageBox(l10n.get(title), l10n.get(msg), 1);
 	}
 }
