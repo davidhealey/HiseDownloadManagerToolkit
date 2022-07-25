@@ -19,7 +19,8 @@ namespace Plugins
 {
 	const unzipTimer = Engine.createTimerObject();
 	const appData = FileSystem.getFolder(FileSystem.AppData);
-
+	const systemStats = Engine.getSystemStats();
+	
 	reg nest = {};
 	reg extractionCount;
 
@@ -204,14 +205,14 @@ namespace Plugins
 		switch (Engine.getOS())
 		{
 			case "LINUX": return "~/.vst3";
-			case "OSX": return "/Library/Audio/Plug-ins/VST3";
-			case "WIN": return "C:\Program Files\Common Files\VST3";
+			case "OSX":	return "/Users/" + systemStats.LogonName + "/Library/Audio/Plug-ins/VST3";
+			case "WIN": return "C:/Program Files/Common Files/VST3";
 		}
 	}
-	
+
 	inline function getAUPath()
 	{
-		return "/Library/Audio/Plug-Ins/Components";
+		return "/Users/" + systemStats.LogonName + "/Library/Audio/Plug-ins/Components";
 	}
 	
 	inline function getDataPath(name)
