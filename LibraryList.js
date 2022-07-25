@@ -161,6 +161,10 @@ namespace LibraryList
 					message: "Choose a location to install the samples.",
 					buttonText: "Install"
 				}, function(dir) {
+
+					if (!dir.hasWriteAccess())
+						return ErrorHandler.showError("Installation Failed", "You do not have write permission for the selected directory.");
+
 					item.sampleDirectory = dir;
 					Downloader.addToQueue(item);
 				});
