@@ -30,7 +30,7 @@ namespace LibraryItem
 				{
 					if (response)
 					{
-						if (isDefined(item.variations) && item.variations.length > 0)
+						if (isDefined(item.variations))
 							Variations.getVariation(item);
 						else
 							LibraryList.passToDownloader(item);
@@ -39,7 +39,7 @@ namespace LibraryItem
 			}
 			else
 			{
-				if (isDefined(item.variations) && item.variations.length > 0)
+				if (isDefined(item.variations))
 					Variations.getVariation(item);
 				else
 					LibraryList.passToDownloader(item);
