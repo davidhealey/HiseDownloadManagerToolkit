@@ -1,17 +1,17 @@
 namespace Config
 {
 	const MODE = "development";
-	const APP_NAME = "Libre Wave App";
+	const APP_NAME = "Rhapsody";
+	const SHOW_SPLASH = false;
 	const FULL_EXPANSIONS = true;
 	const EXPANSION_HOST = ""; // Only matching expansions will be displayed
 	const ENCODE_EXPANSIONS = false;
 	const SHOW_PLUGINS = true;
 	const NETWORK_IN_PLUGIN = true; // Enable network connection in plugin mode
 	const GRID_LAYOUT = true;
-	const LIST_ROW_HEIGHT = 200; // Height of each list item
 	const GRID_NUM_COLS = 4;
 	const GRID_MARGIN = 25;
-	const GRID_VERTICAL_MARGIN = 15;
+	const GRID_VERTICAL_MARGIN = 5;
 	const GRID_USE_LOAD_BUTTON = true;
 	const DEV_FOLDER = "/media/dave/Work/Projects/Libre Player/libreplayer mkv";
 	
