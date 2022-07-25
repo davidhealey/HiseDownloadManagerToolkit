@@ -55,10 +55,13 @@ namespace UserAccount
     
     lblPassword.setKeyPressCallback(function(event)
     {
-		if (event.keycode == 13 || event.description == "return")
+		if (!isDefined(event.keyCode))
+			return;
+
+		if (event.keyCode == 13 || event.description == "return")
 			login(lblUsername.get("text"), lblPassword.get("text"));
-		else if (!event.specialKey && event.character != "")
-			lblPassword.set("text", lblPassword.get("text") + event.character);			
+		else if (!event.specialKey || event.character == "")
+			lblPassword.set("text", lblPassword.get("text") + event.character);
     });
         
     // btnShowPassword
