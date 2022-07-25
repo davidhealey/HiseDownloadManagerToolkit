@@ -260,7 +260,7 @@ namespace Library
 
 		Server.callWithGET(endpoint, {}, function(status, response)
 		{
-			if (status == 200)
+			if (status == 200 && typeof response == "object")
 			{
 				images.clear();
 

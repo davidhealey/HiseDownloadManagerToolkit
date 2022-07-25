@@ -88,7 +88,7 @@ namespace AddLicense
 		{
 			Spinner.hide();
 
-			if (status == 200)
+			if (status == 200 && typeof response == "object")
 			{
 				if (isDefined(response.status))
 				{
