@@ -20,7 +20,8 @@ namespace UserAccount
 	const appData = FileSystem.getFolder(FileSystem.AppData);
 
 	reg authToken = loadToken();
-	reg online = Server.isOnline();;
+	reg online = Server.isOnline();
+	reg nest = {};
 
     // pnlLogin
     const pnlLogin = Content.getComponent("pnlLogin");
@@ -273,7 +274,7 @@ namespace UserAccount
 	
 	inline function login(username, password)
     {
-        var p = {"username": username.trim(), "password": password};
+        nest.p = {"username": username.trim(), "password": password};
         
         if (!isDefined(username) || username == "" || username == "Email")
 			return Engine.showMessageBox("Invalid Email", "Please enter a valid email address or username.", 3);
@@ -286,17 +287,16 @@ namespace UserAccount
         
         Spinner.show("Logging In");
         
-		Server.callWithPOST("wp-json/jwt-auth/v1/token", p, function(status, response)
+		Server.callWithPOST("wp-json/jwt-auth/v1/token", nest.p, function(status, response)
 		{
 			Spinner.hide();
 
 			if (status == 200 && isDefined(response.token))
 		    {
-				storeCredentials(p.username, response.token);
+				storeCredentials(nest.p.username, response.token);
 		        Library.clearCache();
 		        Library.rebuildCache();
 		        LibraryHeader.setEnabledStateOfButtons();
-		        Engine.rebuildCachedPools();
 		        hide();
 		        LibraryList.show();
 		    }
