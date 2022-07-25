@@ -29,6 +29,7 @@ namespace LibraryList
 	
 	// pnlLibraryList
 	const pnlLibraryList = Content.getComponent("pnlLibraryList");
+	pnlLibraryList.unloadAllImages();
 
 	pnlLibraryList.setPaintRoutine(function(g)
 	{
@@ -40,7 +41,7 @@ namespace LibraryList
 			
 			g.setFont(vptLibraryList.get("fontName"), vptLibraryList.get("fontSize"));
 			g.setColour(Colours.withAlpha(vptLibraryList.get("textColour"), 0.5));
-			g.drawAlignedText(vptLibraryList.get("text"), [0, 0, this.getWidth(), this.getHeight() / 1.2], "centred");
+			g.drawAlignedText(vptLibraryList.get("text"), [0, 0, this.getWidth(), this.getHeight() / 1.05], "centred");
 		}
 		else
 		{

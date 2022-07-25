@@ -24,10 +24,12 @@ namespace GridItem
 		local index = panel.getChildPanelList().length - 1;		
 		local colWidth = panel.getWidth() / Config.GRID_NUM_COLS;
 		local rowWidth = colWidth - Config.GRID_MARGIN;
-		local rowHeight = colWidth + 30;
+		local rowHeight = colWidth + 45;
 		local x = (index % Config.GRID_NUM_COLS) * colWidth + colWidth / 2 - rowWidth / 2;
 		local y = Math.floor(index / Config.GRID_NUM_COLS) * rowHeight + Config.GRID_VERTICAL_MARGIN * Math.floor(index / Config.GRID_NUM_COLS);		
 		local area = [x, y, rowWidth, rowHeight];
+		panel.data.colWidth = colWidth;
+		panel.data.rowHeight = rowHeight;
 
 		p.setPosition(area[0], area[1], area[2], area[3]);
 		p.set("text", data.name);
@@ -178,8 +180,8 @@ namespace GridItem
 		local numItems = panel.getChildPanelList().length;	
 		local viewport = Content.getAllComponents(panel.get("parentComponent"))[0];		
 		local numRows = Math.ceil(numItems / Config.GRID_NUM_COLS);
-		local colWidth = panel.getWidth() / Config.GRID_NUM_COLS;
-		local rowHeight = colWidth + 30;
+		local colWidth = panel.data.colWidth;
+		local rowHeight = panel.data.rowHeight;
 		local height = numRows * rowHeight + (Config.GRID_VERTICAL_MARGIN * (numRows - 1));
 
 		if (!numItems)
@@ -195,8 +197,8 @@ namespace GridItem
 		local textColour = LookAndFeel.formatColour(style.textColour);
 
 		g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
-	
-		g.setColour(Colours.withAlpha(Colours.white, isDefined(p.data.item.installedVersion) ? 1.0 : 0.7));
+
+		g.setColour(Colours.withAlpha(Colours.white, p.data.item.hasLicense ? 1.0 : 0.7));
 	
 		if (this.isImageLoaded(p.data.item.name))
 		{
@@ -207,7 +209,7 @@ namespace GridItem
 				g.setColour(textColour);
 				g.setFont("medium", 22 - Config.GRID_NUM_COLS);
 				g.drawFittedText(p.data.item.name, [a[0] + a[2] / 15, a[1] + a[2] / 3, a[2] - a[2] / 15 * 2, a[2] - a[2] / 3 * 2], "centred", 2, 1);				
-			}			
+			}
 		}
 		
 		// Progress indicator
@@ -253,14 +255,14 @@ namespace GridItem
 				g.drawFittedText(p.data.item.progress.speed, [arcArea[0], a[1] + a[2] / 2 + 20, arcArea[2], 30], "centred", 1, 1.0);
 		}
 	
+		local text = isDefined(p.data.item.displayName) == 1 ? p.data.item.displayName : p.data.item.name;
+		local textWidth = a[2] - 50 - (35 * isDefined(p.data.item.hasUpdate));
+	
 		g.setFont("medium", 18);
 		g.setColour(Colours.withAlpha(textColour, isDefined(p.data.item.installedVersion) ? 1.0 : 0.8));
-
-		if (isDefined(p.data.item.displayName))
-			g.drawMultiLineText(p.data.item.displayName, [a[0], a[1] + a[3] - 30], a[2] - 75 - (25 * isDefined(p.data.item.hasUpdate)), "left", 1.0);
-		else
-			g.drawMultiLineText(p.data.item.name, [a[0], a[1] + a[3] - 30], a[2] - 75 - (25 * isDefined(p.data.item.hasUpdate)), "left", 1.0);
-
+		g.drawMultiLineText(text, [a[0], a[1] + a[2] + 25], textWidth, "left", 2.0);
+		
+		
 		// Paint buttons
 		if (isDefined(p.data.buttons))
 			for (b in p.data.buttons)
