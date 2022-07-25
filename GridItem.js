@@ -193,7 +193,7 @@ namespace GridItem
 		local a = [p.get("x"), p.get("y"), p.getWidth(), p.getHeight()];
 		local style = Theme.getProperty("libraryItem");
 		local textColour = LookAndFeel.formatColour(style.textColour);
-		
+
 		g.drawDropShadow([a[0], a[1], a[2], a[2]], Colours.withAlpha(Colours.black, 0.6), 20);
 	
 		g.setColour(Colours.withAlpha(Colours.white, isDefined(p.data.item.installedVersion) ? 1.0 : 0.7));

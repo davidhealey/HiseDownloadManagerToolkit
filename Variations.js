@@ -84,7 +84,7 @@ namespace Variations
 		item = data;
 
 		if (!isDefined(item.variations)) return;
-				
+
 		if (item.variations.length == 1)
 		{
 			item.variation = item.variations[0].id;
