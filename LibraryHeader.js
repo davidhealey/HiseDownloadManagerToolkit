@@ -53,8 +53,11 @@ namespace LibraryHeader
 			{
 				local cooldown = Engine.getUptime() - syncCooldown;
 
+				local remaining = parseInt(Math.ceil(15 - cooldown));
+				local seconds = remaining == 1 ? l10n.get("second") : l10n.get("seconds");
+
 				if (cooldown < 15)
-					return Engine.showMessageBox("Cooldown", "Please wait " + parseInt(Math.ceil(15 - cooldown)) + " seconds.", 0);
+					return Engine.showMessageBox(l10n.get("Cooldown"), l10n.get("Please wait") + " " + remaining + " " + seconds + ".", 0);
 
 				if (Content.isCtrlDown())
 					Library.clearCache();
@@ -65,7 +68,7 @@ namespace LibraryHeader
 			}				
 			else
 			{
-				Engine.showMessageBox("Limit Reached", "You've reached the sync limit. Please restart the app if you need to sync again.", 0);
+				Engine.showMessageBox(l10n.get("Limit Reached"), l10n.get("You've reached the sync limit. Please restart the app if you need to sync again."), 0);
 			}
 		}
 	}
