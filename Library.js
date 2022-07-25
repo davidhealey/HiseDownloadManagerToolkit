@@ -25,6 +25,12 @@ namespace Library
 	reg nest = {}; // Variables used inside nested functions
 	reg appDownload;
 	
+	// Flags
+	reg syncing = false;
+	reg downloading = false;
+	reg abort = false;
+	reg autoSyncing = false;
+	
 	// pnlLibrary
 	const pnlLibrary = Content.getComponent("pnlLibrary");
 	
@@ -55,7 +61,10 @@ namespace Library
 			local today = Engine.getSystemTime(false).substring(0, 8);
 
 			if (lastSync != today)
+			{
+				autoSyncing = true;
 				rebuildCache();
+			}				
 
 			UserSettings.setValue("synctime", today);
 		}
@@ -247,6 +256,7 @@ namespace Library
 		Server.setHttpHeader(headers.join("\n"));
 
 		Spinner.show("Syncing");
+		syncing = true;
 
 		Server.callWithGET(endpoint, {}, function(status, response)
 		{
@@ -303,10 +313,14 @@ namespace Library
 			}
 			else
 			{
-				nest.msg = "The server reported an error, please try again later or contact support.";
-				ErrorHandler.serverError(status, response, nest.msg);
+				if (!autoSyncing)
+					ErrorHandler.serverError(status, response, l10n.get("The server reported an error, please try again later or contact support."));
+
 				Spinner.hide();
+				syncing = false;
 			}
+
+			autoSyncing = false;
 		});
 	}
 
@@ -330,6 +344,7 @@ namespace Library
 	{
 		local headers = ["Authorization: Bearer " + UserAccount.getToken()];
 		local endpoint = Config.apiPrefix + "check_for_app_update";
+
 		local p = {
 			app_name: Config.APP_NAME,
 			user_version: Engine.getVersion(),
@@ -341,11 +356,12 @@ namespace Library
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
 
 		Spinner.show("Syncing");
+		syncing = true;
 
 		Server.callWithGET(endpoint, p, function(status, response)
 		{
 			if (status == 200)
-			{	
+			{
 				if (response[0] != false)
 				{
 					var msg = "A new version of " + Engine.getName() + " is available. Would you like to download the installer now?";
@@ -356,12 +372,15 @@ namespace Library
 					{
 						if (action)
 							downloadAppUpdate(nest.url, nest.filename);
+						else
+							syncing = false;
 					});
 				}
 			}
 			else
 			{
 				ErrorHandler.serverError(status, response, "");
+				syncing = false;
 			}
 
 			Spinner.hide();
@@ -377,8 +396,11 @@ namespace Library
 		Server.setBaseURL(prefix);
 		Server.cleanFinishedDownloads();
 
-		Spinner.show("Downloading Update");
+		Spinner.show(l10n.get("Downloading Update"));
+		downloading = true;
 		btnCancelAppUpdate.showControl(true);
+
+		abort = false;
 
 		appDownload = Server.downloadFile(url.replace(prefix), {}, nest.f, function()
 		{
@@ -396,35 +418,58 @@ namespace Library
 								FileSystem.fromAbsolutePath(nest.f.toString(nest.f.FullPath)).show();
 
 							Engine.quit();
-						}							
+						}
+						else
+						{
+							syncing = false;
+						}
 					});
+					
+					downloading = false;
 				}
 				else
 				{
-					Engine.showMessageBox("Error", "The download was unsuccessful.", 3);
+					if (abort == false)
+						Engine.showMessageBox("Error", "The download was unsuccessful.", 3);
+
+					syncing = false;
+					downloading = false;
 				}
-				
+
 				appDownload = undefined;
 				Spinner.hide();
 				btnCancelAppUpdate.showControl(false);
 			}
 			else
 			{
-				Spinner.show("Downloading: " + Math.round(this.getProgress() * 100) + "%");
+				var text = l10n.get("Downloading Update: " + Math.round(this.getProgress() * 100) + "%");
+
+				if (Splash.isVisible())
+				{
+					Splash.setText(text);
+					Splash.setProgress(this.getProgress());
+				}
+				else
+				{
+					Spinner.show(text);
+				}				
 			}
 		});
 	}
 	
 	inline function cancelAppUpdate()
-	{	
+	{			
 		Engine.showYesNoWindow("Cancel", l10n.get("Are you sure you want to cancel the update?"), function(response)
 		{
 			if (response && isDefined(appDownload))
 			{
+				abort = true;
 				appDownload.abort();
 				Spinner.hide();
+				syncing = false;
+				downloading = false;
 				btnCancelAppUpdate.showControl(false);
-			}				
+			}
 		});
 	}
 
@@ -434,8 +479,17 @@ namespace Library
 		ProgressBar.stop();
 		updateCatalogue();
 	}
+	
+	inline function isSyncing()
+	{
+		return syncing;
+	}
+	
+	inline function isDownloading()
+	{
+		return downloading;
+	}
 
 	// Function calls
-	autoSync();
 	updateCatalogue();
 }
