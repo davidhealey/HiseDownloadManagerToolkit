@@ -107,6 +107,9 @@ namespace Expansions
 	{
 		if (isDefined(sampleDir) && sampleDir.isDirectory())
 		{
+			if (!sampleDir.hasWriteAccess())
+				return ErrorHandler.showError("Unwritable Directory", "You do not have write permission for the selected directory. Please choose a different one.");
+
 			createExpansionDirectory(nest.expName, sampleDir);
 			Spinner.show("Installing");
 			unpackZips(sampleDir);

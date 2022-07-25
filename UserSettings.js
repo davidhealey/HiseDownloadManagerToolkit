@@ -132,19 +132,9 @@ namespace UserSettings
 	inline function onbtnSamplePathControl(component, value)
 	{
 		if (!value)
-		{
-			local startFolder = FileSystem.Desktop;	
-
-			FileSystem.browseForDirectory(startFolder, function(dir)
-			{
-				if (isDefined(dir) && dir.isDirectory())
-				{
-					lblSamplePath.set("text", dir.toString(dir.FullPath));
-				}
-			});
-		}
+			selectSamplePath();
 	}
-		
+			
 	// pnlSettingsTab1 - Engine
 	pnlSettingsTab[1].setPaintRoutine(function(g)
 	{
@@ -205,6 +195,28 @@ namespace UserSettings
 	}
 
 	// Functions
+	inline function selectSamplePath()
+	{
+		local startFolder;
+		
+		if (isDefined(data.samplePath) && data.samplePath != "")
+			startFolder = FileSystem.fromAbsolutePath(data.samplePath);
+			
+		if (!isDefined(startFolder))
+			startFolder = FileSystem.Desktop;
+ 
+		FileSystem.browseForDirectory(startFolder, function(dir)
+		{
+			if (isDefined(dir) && dir.isDirectory())
+			{
+				if (!dir.hasWriteAccess())
+					ErrorHandler.showError("Unwritable Directory", "You do not have write permission for the selected directory. Please choose a different one.");
+				else
+					lblSamplePath.set("text", dir.toString(dir.FullPath));	
+			}
+		});
+	}
+
 	inline function changeTab(index)
 	{
 		for (i = 0; i < NUM_TABS; i++)
