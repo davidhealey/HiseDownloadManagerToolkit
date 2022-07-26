@@ -61,8 +61,6 @@ namespace UserAccount
 
 		if (event.keyCode == 13 || event.description == "return")
 			login(lblUsername.get("text"), lblPassword.get("text"));
-		else if (!event.specialKey || event.character == "")
-			lblPassword.set("text", lblPassword.get("text") + event.character);
     });
         
     // btnShowPassword
