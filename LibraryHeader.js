@@ -49,14 +49,14 @@ namespace LibraryHeader
 			if (!isDefined(UserAccount.isOnlineAndIsLoggedIn()))
 				return;
 	
-			if (syncCount < 10)
+			if (syncCount < 10 || Config.MODE == "development")
 			{
 				local cooldown = Engine.getUptime() - syncCooldown;
 
 				local remaining = parseInt(Math.ceil(15 - cooldown));
 				local seconds = remaining == 1 ? l10n.get("second") : l10n.get("seconds");
 
-				if (cooldown < 15)
+				if (cooldown < 15 && Config.MODE != "development")
 					return Engine.showMessageBox(l10n.get("Cooldown"), l10n.get("Please wait") + " " + remaining + " " + seconds + ".", 0);
 
 				if (Content.isCtrlDown())
