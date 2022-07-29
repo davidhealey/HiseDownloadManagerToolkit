@@ -281,9 +281,17 @@ namespace Expansions
 		local expansions = appData.getChildFile("Expansions");
 
 		if (Config.MODE == "development")
-			expansions = FileSystem.fromAbsolutePath(Config.DEV_FOLDER).getChildFile("Expansions");
+			expansions = FileSystem.fromAbsolutePath(Config.DEV_FOLDER + "/Expansions");
 
-		return expansions.getChildFile(expName);
+		if (!isDefined(expansions) || !expansions.isDirectory())
+			Console.print("Expansions directory could not be found.");
+
+		local dir = expansions.getChildFile(expName);
+
+		if (!isDefined(dir) || !dir.isDirectory())
+			dir = expansions.createDirectory(expName);
+
+		return dir;
 	}
 
 	inline function getExpansionNamesFromZips()
@@ -308,19 +316,10 @@ namespace Expansions
 		{
 			local expansions = appData.getChildFile("Expansions");
 			
-			if (Config.MODE == "development")
-				expansions = FileSystem.fromAbsolutePath("/media/dave/Work/Projects/Libre Player/libreplayer mkv/Expansions");
-
-			if (!isDefined(expansions) || !expansions.isDirectory())
-				expansions = appData.createDirectory("Expansions");
-
-			local expDir = expansions.getChildFile(expName);
-
-			if (!isDefined(expDir) || !expDir.isDirectory())
-				expDir = expansions.createDirectory(expName);
-
-			local samplesDir = expDir.getChildFile("Samples");
+			local expDir = getExpansionDirectory(expName);
 			
+			local samplesDir = expDir.getChildFile("Samples");
+				
 			if (!isDefined(samplesDir) || !samplesDir.isDirectory())
 				samplesDir = expDir.createDirectory("Samples");
 			
@@ -328,9 +327,9 @@ namespace Expansions
 			
 			if (sampleTarget.toString(sampleTarget.NoExtension) != expName)
 				samplesTargetSubDir = sampleTarget.createDirectory(expName);
-
+			
 			createLinkFile(samplesDir, samplesTargetSubDir);
-
+			
 			return expDir;
 		}
 	}
