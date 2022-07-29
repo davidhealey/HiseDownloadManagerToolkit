@@ -252,15 +252,20 @@ namespace Library
 		local endpoint = Config.apiPrefix + "get_catalogue";
 		local headers = ["Authorization: Bearer " + UserAccount.getToken()];
 
+		local p = {allow_beta: UserSettings.getValue("beta")};
+		
+		if (isDefined(Config.EXPANSION_HOST) && Config.EXPANSION_HOST != "")
+			p.category = Config.EXPANSION_HOST;
+
 		Server.setBaseURL(Config.baseURL[Config.MODE]);
 		Server.setHttpHeader(headers.join("\n"));
 
 		Spinner.show("Syncing");
 		syncing = true;
 
-		Server.callWithGET(endpoint, {}, function(status, response)
+		Server.callWithGET(endpoint, p, function(status, response)
 		{
-			if (status == 200 && typeof response == "object")
+			if (status == 200 && typeof response == "object" && response.length > 0)
 			{
 				images.clear();
 
@@ -313,7 +318,7 @@ namespace Library
 			}
 			else
 			{
-				if (!autoSyncing)
+				if (!autoSyncing && typeof response == "string")
 					ErrorHandler.serverError(status, response, l10n.get("The server reported an error, please try again later or contact support."));
 
 				Spinner.hide();
