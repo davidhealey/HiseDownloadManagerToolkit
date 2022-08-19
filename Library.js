@@ -16,11 +16,11 @@
 */
 
 namespace Library
-{	
-	const images = [];
+{
 	const items = [];
-	
+	const images = [];
 	const appData = FileSystem.getFolder(FileSystem.AppData);
+
 	reg cache = appData.createDirectory("cache");
 	reg nest = {}; // Variables used inside nested functions
 	reg appDownload;
@@ -247,6 +247,80 @@ namespace Library
 		return result;
 	}
 
+	inline function downloadImages(data)
+	{
+		local urls = [];
+		
+		var cachedImages = getCachedImageNames();
+		nest.numItems = data.length;
+
+		images.clear();
+
+		Server.cleanFinishedDownloads();
+		Server.setBaseURL(Config.baseURL[Config.MODE]);
+
+		Spinner.show("Downloading Images");
+		syncing = true;
+		
+		for (x in data)
+		{
+			if (cachedImages.contains(x.id))
+			{
+				if (!images.contains(x.id))
+					images.push(x.id);
+			}
+			else if (isDefined(x.image))
+			{
+				local url = x.image.replace(Config.baseURL[Config.MODE], "");
+				local f = cache.getChildFile(x.id + ".jpg");
+
+				if (urls.contains(url))
+				{
+					images.push("");
+					continue;	
+				}
+
+				urls.push(url);
+
+				Server.downloadFile(url, {}, f, function()
+				{
+					if (this.data.finished)
+					{
+						nest.img = this.getDownloadedTarget();
+						nest.id = nest.img.toString(nest.img.NoExtension);
+
+						if (this.data.success)
+						{
+							if (!images.contains(nest.id))
+								images.push(nest.id);
+
+							if (images.length >= nest.numItems && Spinner.isVisible())
+							{
+								checkForAppUpdate();
+								updateCatalogue();
+							}
+						}
+						else
+						{
+							Console.print("Failed to download image for " + nest.id);
+							images.push("");
+						}
+					}
+				});
+			}
+			else
+			{
+				images.push(""); // Just a value to fill out the array
+			}
+						
+			if (images.length >= nest.numItems && Spinner.isVisible())
+			{
+				checkForAppUpdate();
+				updateCatalogue();
+			}
+		}
+	}
+
 	inline function rebuildCache()
 	{
 		local endpoint = Config.apiPrefix + "get_catalogue";
@@ -267,54 +341,10 @@ namespace Library
 		{
 			if (status == 200 && typeof response == "object" && response.length > 0)
 			{
-				images.clear();
-
-				nest.f = cache.getChildFile("cache.json");
-				nest.f.writeEncryptedObject(response, encryptionKey);
-				nest.numItems = response.length;				
-				nest.cachedImages = getCachedImageNames();
-
-				for (x in response)
-				{
-					if (nest.cachedImages.indexOf(x.id) != -1)
-					{
-						if (!images.contains(x.id))
-							images.push(x.id);
-					}
-					else if (isDefined(x.image))
-					{
-						nest.url = x.image.replace(Config.baseURL[Config.MODE], "");
-						nest.f = cache.getChildFile(x.id + ".jpg");
-							
-						Server.downloadFile(nest.url, {}, nest.f, function()
-						{
-							if (this.data.finished && this.data.success)
-							{
-								nest.img = this.getDownloadedTarget();
-								nest.name = nest.img.toString(nest.img.NoExtension);
-		
-								if (!images.contains(nest.name))
-									images.push(nest.name);
-		
-								if (images.length >= nest.numItems && Spinner.isVisible())
-								{
-									checkForAppUpdate();
-									updateCatalogue();
-								}							
-							}
-						});
-					}
-					else
-					{
-						images.push(""); // Just a value to fill out the array
-					}
-
-					if (images.length >= nest.numItems && Spinner.isVisible())
-					{
-						checkForAppUpdate();
-						updateCatalogue();
-					}
-				}
+				var f = cache.getChildFile("cache.json");
+				f.writeEncryptedObject(response, encryptionKey);
+				
+				downloadImages(response);
 			}
 			else
 			{
