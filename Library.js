@@ -123,48 +123,17 @@ namespace Library
 			LibraryList.populateFromArray(result);
 		}
 	}
-		
-	inline function uninstall(data)
-	{
-		local msg = "Are you sure you want to uninstall this product?";
-		nest.item = data; // Reg required for scope
-
-		Engine.showYesNoWindow("Confirm Action", msg, function(response)
-		{
-			if (response)
-			{
-				nest.result = false;
-
-				if (nest.item.format == "expansion")
-					nest.result = Expansions.uninstall(nest.item.name);
-				else if (nest.item.format == "plugin" && isDefined(Plugins.uninstall))
-					nest.result = Plugins.uninstall(nest.item);
-
-				if (nest.result == true)
-					Engine.showMessageBox("Success", "Product was successfully uninstalled.", 0);
-				else
-					Engine.showMessageBox("Complete", "The uninstall process is complete. Some files may remain on your system.", 1);
-				
-				updateCatalogue();
-			}
-		});
-	}
 				
 	inline function getCachedFile(filename)
 	{
 		local f = cache.getChildFile(filename);
 
-		if (f.isFile())
+		if (isDefined(f) && f.isFile())
 			return f;
 
 		return false;
 	}
-		
-	inline function show(state)
-	{
-		pnlLibrary.showControl(state);
-	}
-		
+				
   	inline function updateCatalogue()
 	{
 		if (cache.isDirectory())
