@@ -238,7 +238,7 @@ namespace UserSettings
 				break;
 
 			case "WIN":
-				lblVst3Path.set("text", "C:\Program Files\Common Files\VST3");
+				lblVst3Path.set("text", "C:\\Program Files\\Common Files\\VST3");
 				lblAuPath.set("text", "");
 				break;
 		}
