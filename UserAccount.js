@@ -56,13 +56,19 @@ namespace UserAccount
     
     lblPassword.setKeyPressCallback(function(event)
     {
-		if (!isDefined(event.keyCode))
-			return;
-
-		if (event.keyCode == 13 || event.description == "return")
-			login(lblUsername.get("text"), lblPassword.get("text"));
+    	if (event.keyCode == 13 || event.description == "return")
+			lblPasswordTimer.startTimer(11);
     });
-        
+    
+    // lblPasswordTimer - to handle return key action
+    const lblPasswordTimer = Engine.createTimerObject();
+
+    lblPasswordTimer.setTimerCallback(function()
+    {
+		login(lblUsername.get("text"), lblPassword.get("text"));
+	   	this.stopTimer();
+    });
+
     // btnShowPassword
     const btnShowPassword = Content.getComponent("btnShowPassword");
     btnShowPassword.setLocalLookAndFeel(LookAndFeel.iconButton);
@@ -70,10 +76,7 @@ namespace UserAccount
         
     inline function onbtnShowPasswordControl(component, value)
     {
-    	if (value)
-    		lblPassword.set("fontStyle", "plain");
-    	else
-    		lblPassword.set("fontStyle", "Password");			
+   		lblPassword.set("fontStyle", value ? "plain" : "Password");
     }
     
     // btnLogin
