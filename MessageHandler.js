@@ -15,19 +15,19 @@
     along with This file. If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace ErrorHandler
+namespace MessageHandler
 {
 	const eh = Engine.createErrorHandler();	
 
-	eh.setErrorCallback(function(level, message)
+	/*eh.setErrorCallback(function(level, message)
 	{
 		Engine.showMessageBox("test", message, level);
-	});	
+	});	*/
 	
 	inline function serverError(status, response, defaultMsg)
 	{
-		local msg = defaultMsg;
-		
+		local msg;
+
 		if (isDefined(response.message))
 		{
 			switch (response.message)
@@ -38,7 +38,7 @@ namespace ErrorHandler
 					break;
 
 				default:
-					if (msg == "") msg = response.message;
+					msg = response.message;
 			}
 		}
 		else
@@ -63,21 +63,35 @@ namespace ErrorHandler
 				case 429:
 					msg = "The server has received too many requests. Please try again later.";
 					break;
-					
-				default:
-					if (defaultMsg != "")
-						msg = defaultMsg;
-					else
-						msg = "A server error was encountered. Please try again later.";
 			}
 		}
 
-		if (isDefined(msg))
-			Engine.showMessageBox("Server Error " + status, msg, 1);
+		if (msg == "")
+		{
+			if (defaultMsg != "")
+				msg = defaultMsg;
+			else
+				msg = "A server error was encountered. Please try again later.";
+		}
+		
+		Engine.showMessageBox("Server Error " + status, cleanHTML(msg), 1);
 	}
 	
-	inline function showError(title, msg)
+	inline function showMessage(title, msg, type)
 	{
-		Engine.showMessageBox(l10n.get(title), l10n.get(msg), 1);
+		Engine.showMessageBox(l10n.get(title), l10n.get(msg), type);
+	}
+	
+	inline function cleanHTML(str)
+	{
+		local result = str;
+		local matches = Engine.getRegexMatches(result, "<[^<>]+>");
+	
+		for (x in matches)
+			result = result.replace(x);
+
+		result = result.replace("ERROR: ");
+
+		return result.trim();
 	}
 }
