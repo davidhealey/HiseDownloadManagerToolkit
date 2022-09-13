@@ -362,36 +362,22 @@ namespace Expansions
 			local rootFolder = e.getRootFolder();
 			local sampleFolder = e.getSampleFolder();
 
-			if (rootFolder.isDirectory())
+			if (isDefined(rootFolder) && rootFolder.isDirectory())
 			{
-				local hxi = rootFolder.getChildFile("info.hxi");
+				local files = FileSystem.findFiles(rootFolder, "*", false);
 
-				if (hxi.isFile())
-					result = hxi.deleteFileOrDirectory();
-				else
-					msg = "The expansion data file was not found.";
+				for (x in files)
+				{
+					if (x.toString(x.FileName) == "UserPresets") continue;
+					x.deleteFileOrDirectory();
+				}
 			}
 
-			if (sampleFolder.isDirectory())
-			{
-				local samples = FileSystem.findFiles(sampleFolder, "*.ch*", false);
-
-				for (ch in samples)
-					ch.deleteFileOrDirectory();
-
-				// Delete samples folder if empty
-				local files = FileSystem.findFiles(sampleFolder, "*", true);
-				
-				if (!files.length)
-					sampleFolder.deleteFileOrDirectory();
-
-				result = true;
-			}
+			if (isDefined(sampleFolder) && sampleFolder.isDirectory())
+				result = sampleFolder.deleteFileOrDirectory();
 			else
-			{
 				msg = "The uninstallation completed but the sample directory could not be found.";
-			}
-			
+
 			e.unloadExpansion();
 		}
 		else
