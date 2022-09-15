@@ -73,6 +73,7 @@ namespace Expansions
 			else
 			{
 				nest.expName = getExpansionNameFromFilename(f.toString(f.NoExtension));
+				zips = findZipFilesForExpansion(f.getParentDirectory(), f.toString(f.NoExtension));
 				
 				if (isDefined(nest.expName))
 				{
@@ -124,6 +125,23 @@ namespace Expansions
 		if (isDefined(matches))
 			result = matches[0].replace("_hxi").replace("_dat").replace("_samples").replace("_", " ").trim().capitalize();
 
+		return result;
+	}
+
+	inline function findZipFilesForExpansion(dir, hxiName)
+	{
+		local result = [];
+		local query = hxiName.substring(0, hxiName.indexOf("_hxi"));
+		local files = FileSystem.findFiles(dir, query + "*.zip", false);
+	
+		for (x in files)
+		{
+			local name = x.toString(x.NoExtension);
+	
+			if (!name.contains(query + "_hxi") && !name.contains(query + "_samples") && !name.contains(query + "_dat")) continue;
+			result.push(x);
+		}
+			
 		return result;
 	}
 
